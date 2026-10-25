@@ -2,6 +2,8 @@
 
 MSX2版『悪魔城ドラキュラ』の操作と画面端処理を改善するIPSパッチです。
 
+**3種類とも適用後のROMは1Mbit（128 KiB／131,072バイト）です。** 画像・音楽・ステージを削除せず、データの可逆圧縮と重複整理で元の容量内へ収めています。
+
 | パッチ | 内容 |
 |---|---|
 | [fall_attack.ips](dist/fall_attack.ips) | 足場から落下している間も鞭・剣・斧・十字架・聖水・砂時計を使用可能にする |
@@ -20,7 +22,7 @@ MSX2版『悪魔城ドラキュラ』の操作と画面端処理を改善するI
 
 1. 手元の無改変ROMのサイズとSHA-256を確認してください。
 2. 3つのうち**どれか1つ**のIPSを、無改変ROMのコピーへ適用してください。パッチを重ねる場合は `combined.ips` を使います。
-3. 適用後のROMは256 KiBになります。エミュレーターでマッパーの指定が必要な場合は **Konami／SCCなし** を選んでください。
+3. 適用後のROMは元と同じ128 KiBです。エミュレーターでマッパーの指定が必要な場合は **Konami／SCCなし** を選んでください。従来の拡張版を使っていた場合も、無改変の原ROMへあらためて適用してください。
 
 対応する入力は、日本版128 KiB、SHA-256が次のものです。
 
@@ -43,6 +45,8 @@ openMSX 21.0／C-BIOS MSX2 JPで、原版と3つの改良版をそれぞれ1,653
 
 別途、各改良版を電源投入から通常のキー入力だけで63.5秒動かし、屋外3画面と城内3画面を通過しました。全編クリア、全機種、実機での動作は未確認です。結果とROMのハッシュは [検証記録](dist/verification.json) に保存しています。
 
+1Mbit化では、全168ポーズの位置・パターン・色を原版と照合し、初期条件を揃えたアイテム・燭台の読み込み後のVRAM全128 KiBも一致しました。12画像の1,536バイトは932バイトへ可逆圧縮しています。従来の拡張版との比較でも、各版8,875回の観測でゲーム状態と表示用データが一致しました。[容量と画像の検証記録](dist/compact-verification.json)を参照してください。
+
 ## ビルドと再検証
 
 Python 3の標準ライブラリーだけでパッチを生成できます。
@@ -58,6 +62,7 @@ python tools/verify_patch_files.py path/to/original.rom
 
 ```powershell
 python tools/verify_emulator.py path/to/original.rom --openmsx path/to/openmsx.exe
+python tools/verify_compact_rom.py path/to/original.rom --openmsx path/to/openmsx.exe
 ```
 
 出現例のスクリーンショットも通常操作から再撮影できます。
@@ -68,4 +73,6 @@ python tools/capture_edge_screenshot.py --rom build/combined.rom --openmsx path/
 
 撮影画像は `build/screenshot/` に保存します。掲載画像は `zombie-left-01.png` です。
 
-実装は [tools/patches.py](tools/patches.py) にあります。追加コードはROMのバンク16に置き、起動時に小さな呼出し用コードをRAM `$E640–E7FF` 内へ配置します。元の設定領域と画像用バッファの間を使い、バンクの切替値を割り込み処理にも反映します。
+実装は [tools/patches.py](tools/patches.py)、可逆圧縮と表示データの整理は [tools/compact_assets.py](tools/compact_assets.py) にあります。追加コードは原ROMのバンク6内へ収め、起動時にRAM `$E618–E7FF` と `$F100–F1C8` 内へ配置します。両機能版の追加コードは647バイトで、再配置したROM領域には149バイトの余裕があります。通常の更新中に追加コード用のバンク切替は行いません。
+
+RAMの利用範囲は、[MSX2 Technical Handbookのカートリッジ作業領域の説明](https://konamiman.github.io/MSX2-Technical-Handbook/md/Chapter5b.html)と、原作のスタック・変数・画像バッファの配置を確認して選んでいます。

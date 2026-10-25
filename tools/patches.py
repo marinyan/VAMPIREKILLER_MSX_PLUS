@@ -1,23 +1,23 @@
 """Z80 hooks for the 128 KiB Japanese Vampire Killer cartridge.
 
-Only the exact input revision is accepted. Helpers live in E640..E7FF,
-between the E600 configuration block and the E800 graphics work buffer.
+Only the exact input revision is accepted. Helpers live in E618..E7FF and
+F100..F1C8, outside the game stack, image buffer and BIOS work areas.
 The startup loader runs after RAM clearing and mapper initialization.
 """
 from __future__ import annotations
 
 import hashlib
 import struct
+from compact_assets import ATLAS_END, POSE_START, POSE_TABLE, physical, repack
 
 SOURCE_SHA256 = "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2"
-RAM_BASE = 0xE640
+RAM_BASE = 0xE618
 RAM_END = 0xE800
+SIDE_BASE = 0xF100
+SIDE_END = 0xF1C9
 LOADER_OFFSET = 0x7FC0
 LOADER_ADDRESS = 0xBFC0
-PAYLOAD_OFFSET = 0x20000
-OUTPUT_SIZE = 0x40000
-CODE_BASE = 0xA400
-CODE_OFFSET = PAYLOAD_OFFSET + 0x400
+OUTPUT_SIZE = 0x20000
 VARIANTS = {"fall_attack": (True, False), "screen_edges": (False, True), "combined": (True, True)}
 
 
@@ -26,16 +26,26 @@ class Code:
 
     def __init__(self, base):
         self.base, self.data, self.labels, self.fixups, self.lines = base, bytearray(), {}, [], []
+        self.segments, self.records = [(0, base)], []
+
+    def address(self, offset):
+        start, base = next((start, base) for start, base in reversed(self.segments) if start <= offset)
+        return base + offset - start
+
+    def org(self, address):
+        self.segments.append((len(self.data), address))
+        self.lines.append(f"; org ${address:04X}")
 
     def label(self, name):
         if name in self.labels:
             raise ValueError(f"Duplicate label: {name}")
-        self.labels[name] = self.base + len(self.data)
+        self.labels[name] = self.address(len(self.data))
         self.lines.append(f"{name}:")
 
     def emit(self, hex_bytes, mnemonic):
         raw = bytes.fromhex(hex_bytes)
-        self.lines.append(f"    ; ${self.base + len(self.data):04X}  {raw.hex(' ').upper()}\n    {mnemonic}")
+        self.records.append((len(self.lines), len(self.data), len(raw)))
+        self.lines.append(f"    ; ${self.address(len(self.data)):04X}  {raw.hex(' ').upper()}\n    {mnemonic}")
         self.data.extend(raw)
 
     def branch(self, opcode, target, mnemonic, relative=False):
@@ -56,25 +66,21 @@ class Code:
         for offset, target, relative in self.fixups:
             address = self.labels[target] if isinstance(target, str) else target
             if relative:
-                delta = address - (self.base + offset + 1)
+                delta = address - (self.address(offset) + 1)
                 if not -128 <= delta <= 127:
                     raise ValueError(f"JR out of range: {target}")
                 self.data[offset] = delta & 255
             else:
                 self.data[offset:offset + 2] = struct.pack("<H", address)
-        for index, line in enumerate(self.lines):
-            if line.startswith("    ; $") and "\n" in line:
-                prefix, mnemonic = line.split("\n", 1)
-                fields = prefix.split()
-                address = int(fields[1][1:], 16)
-                start, size = address - self.base, len(fields) - 2
-                raw = self.data[start:start + size]
-                self.lines[index] = f"    ; ${address:04X}  {raw.hex(' ').upper()}\n{mnemonic}"
+        for index, start, size in self.records:
+            mnemonic = self.lines[index].split("\n", 1)[1]
+            raw = self.data[start:start + size]
+            self.lines[index] = f"    ; ${self.address(start):04X}  {raw.hex(' ').upper()}\n{mnemonic}"
         return bytes(self.data)
 
 
 def helpers(fall, edges):
-    c = Code(CODE_BASE)
+    c = Code(RAM_BASE)
     if fall:
         c.label("special_state")
         c.emit("3A 20 C4 FE 04 C0 3E 01 C9", "ld a,($C420) / cp 4 / ret nz / ld a,1 / ret")
@@ -170,7 +176,7 @@ def helpers(fall, edges):
         c.jp(0x99F6)
 
         # Both normal and shared pose tables call this with A = part X offset.
-        # These four enemy kinds and the small heart use X offset -8.
+        # Signed offsets vary by pose; preserve each part's actual coordinates.
         c.label("sprite_x")
         c.emit("C5 4F DD 7E 00", "push bc / ld c,a / ld a,(ix+0)")
         c.call("linear_bullet")
@@ -274,6 +280,7 @@ def helpers(fall, edges):
         c.call(0x7D2F)
         c.jp(0x7C5E)
 
+        c.org(SIDE_BASE)
         c.label("weapon_x")
         c.emit("DD 7E 01 FE 02", "ld a,(ix+1) / cp 2")
         c.jr("weapon_move_original", "nz")
@@ -329,39 +336,63 @@ def helpers(fall, edges):
     return c, bytes(c.data)
 
 
+def image_loader(address, packed_atlas):
+    c = Code(address)
+    c.label("image_upload")
+    c.emit("C5", "push bc")
+    c.emit("11 " + struct.pack("<H", packed_atlas).hex(" "), "ld de,compressed_atlas")
+    c.emit("21 00 E8", "ld hl,$E800")
+    c.call("unpack")
+    c.emit("C1 21 00 E8 C9", "pop bc / ld hl,$E800 / ret")
+    c.label("candle_upload")
+    c.call(0x4A90)
+    c.emit("21 C8 BF 06 01", "ld hl,$BFC8 / ld b,1 ; preserve original fifth-image source")
+    c.jp(0x4A90)
+    c.label("unpack")
+    c.emit("1A 13 B7 C8 CB 7F", "ld a,(de) / inc de / or a / ret z / bit 7,a")
+    c.jr("match", "nz")
+    c.emit("47", "ld b,a")
+    c.label("literals")
+    c.emit("1A 13 77 23", "ld a,(de) / inc de / ld (hl),a / inc hl")
+    c.branch(0x10, "literals", "djnz", True)
+    c.jr("unpack")
+    c.label("match")
+    c.emit("E6 7F C6 03 47 1A 13 D5 E5 5F 16 00 13 B7 ED 52 EB E1",
+           "decode length and distance / save packed cursor / get backward-copy source")
+    c.label("copy_match")
+    c.emit("1A 13 77 23", "ld a,(de) / inc de / ld (hl),a / inc hl")
+    c.branch(0x10, "copy_match", "djnz", True)
+    c.emit("D1", "pop de")
+    c.jr("unpack")
+    return c
+
+
 def make_rom(source, *, fall, edges):
     if len(source) != 0x20000 or hashlib.sha256(source).hexdigest() != SOURCE_SHA256:
         raise ValueError("Unsupported input ROM. Expected 128 KiB SHA-256 " + SOURCE_SHA256)
     if not (fall or edges):
         raise ValueError("Select at least one improvement")
-    # Entry stubs preserve AF and restore the active graphics/logic bank.
-    # The larger bodies execute from the added ROM bank, keeping RAM bounded.
-    bodies, _ = helpers(fall, edges)
-    entries = (["special_state", "fall_pose", "holy_water_slot"] if fall else []) + ([
-        "spawn_ground", "spawn_flying", "cull_x", "sprite_x", "sprite_shared", "integrate_x", "heart_landing_x", "drop_floor",
-        "projectile_init", "weapon_x", "weapon_cull", "weapon_draw", "weapon_collision"
-    ] if edges else [])
-    c = Code(RAM_BASE)
-    for label in entries:
-        c.label(label)
-        c.emit("F5 F3 3E 10 32 00 A0 32 F3 F0 FB F1", "push af / di / map bank 16 / ei / pop af")
-        c.call(bodies.labels[label])
-        c.jp("restore_sprites" if label in ("sprite_x", "sprite_shared") else "restore_logic")
-    for label, bank in (("restore_logic", 3), ("restore_sprites", 6)):
-        c.label(label)
-        c.emit(f"F5 F3 3E {bank:02X} 32 00 A0 32 F3 F0 FB F1 C9", f"push af / di / map bank {bank} / ei / pop af / ret")
+    c, _ = helpers(fall, edges)
     if edges:
-        c.label("spawn_original")
-        c.emit("F5 F3 3E 03 32 00 A0 32 F3 F0 FB F1", "push af / di / map bank 3 / ei / pop af")
-        c.jp(0x5F1D)
-        bodies.labels["spawn_original"] = c.labels["spawn_original"]
+        c.labels["spawn_original"] = 0x5F1D
     payload = c.finish()
-    body_bytes = bodies.finish()
-    if RAM_BASE + len(payload) > RAM_END:
-        raise ValueError("Entry stubs exceed reserved RAM")
-    if CODE_BASE + len(body_bytes) > 0xC000:
-        raise ValueError("Helper bodies exceed ROM bank 16")
-    result = bytearray(source) + bytearray([255]) * (OUTPUT_SIZE - len(source))
+    table, poses, atlas, asset_info = repack(source)
+    atlas_address = POSE_START + len(poses)
+    payload_address = atlas_address + len(atlas)
+    codec = image_loader(payload_address + len(payload), atlas_address)
+    codec_bytes = codec.finish()
+    used_end = codec.base + len(codec_bytes)
+    if used_end > ATLAS_END:
+        raise ValueError("Repacked data and code exceed bank 6 storage")
+    ram_chunks = []
+    for index, (start, address) in enumerate(c.segments):
+        end = c.segments[index + 1][0] if index + 1 < len(c.segments) else len(payload)
+        limit = RAM_END if address == RAM_BASE else SIDE_END
+        if address + end - start > limit:
+            raise ValueError("Resident code exceeds reserved RAM")
+        ram_chunks.append(dict(address=address, size=end - start,
+                               source_offset=physical(payload_address) + start))
+    result = bytearray(source)
     changes = []
 
     def edit(offset, expected, replacement, purpose):
@@ -376,10 +407,13 @@ def make_rom(source, *, fall, edges):
         edit(offset, expected, bytes([opcode]) + struct.pack("<H", c.labels[label]), purpose)
 
     loader = Code(LOADER_ADDRESS)
-    loader.emit("F3 3E 10 32 00 80 32 F2 F0", "di / ld a,16 / ld ($8000),a / ld ($F0F2),a")
-    loader.emit("21 00 80 11 40 E6", "ld hl,$8000 / ld de,$E640")
-    loader.emit("01 " + struct.pack("<H", len(payload)).hex(" "), f"ld bc,{len(payload)}")
-    loader.emit("ED B0", "ldir")
+    loader.emit("F3 3E 06 32 00 80 32 F2 F0", "di / ld a,6 / ld ($8000),a / ld ($F0F2),a")
+    for chunk in ram_chunks:
+        source_address = 0x8000 + chunk["source_offset"] - 6 * 8192
+        loader.emit("21 " + struct.pack("<H", source_address).hex(" "), "ld hl,resident_code_source")
+        loader.emit("11 " + struct.pack("<H", chunk["address"]).hex(" "), "ld de,resident_code_destination")
+        loader.emit("01 " + struct.pack("<H", chunk["size"]).hex(" "), f"ld bc,{chunk['size']}")
+        loader.emit("ED B0", "ldir")
     loader.emit("3E 02 32 00 80 32 F2 F0 FB", "ld a,2 / ld ($8000),a / ld ($F0F2),a / ei")
     loader.jp(0x5C92)
     loader_bytes = loader.finish()
@@ -387,8 +421,17 @@ def make_rom(source, *, fall, edges):
         raise ValueError("Startup loader overflow")
     edit(0x00A9, "CD 92 5C", "CD C0 BF", "Install helpers after RAM and mapper initialization")
     edit(LOADER_OFFSET, bytes([255]) * len(loader_bytes), loader_bytes, "Startup loader")
-    edit(PAYLOAD_OFFSET, bytes([255]) * len(payload), payload, "Helper code")
-    edit(CODE_OFFSET, bytes([255]) * len(body_bytes), body_bytes, "Banked helper bodies")
+    edit(physical(POSE_TABLE), source[physical(POSE_TABLE):physical(POSE_TABLE) + len(table)], table,
+         "Repoint losslessly packed actor pose streams")
+    storage = poses + atlas + payload + codec_bytes + bytes([255]) * (ATLAS_END - used_end)
+    edit(physical(POSE_START), source[physical(POSE_START):physical(ATLAS_END)], storage,
+         "Lossless graphics packing and resident code storage within bank 6")
+    edit(0x14D1, "21 C8 B9", b"\xcd" + struct.pack("<H", codec.labels["image_upload"]),
+         "Unpack original item/candle bytes to existing image work buffer")
+    edit(0x14DC, "21 C8 BD", "21 00 EC", "Read four candle images from unpacked work buffer")
+    edit(0x14E3, "05", "04", "Upload four packed candles before original fifth-image source")
+    edit(0x14E4, "CD 90 4A", b"\xcd" + struct.pack("<H", codec.labels["candle_upload"]),
+         "Preserve original fifth-image source and upload order")
     if fall:
         hook(0x3136, "3A 20 C4", "special_state", "Allow special weapons in natural-fall state")
         edit(0x31E9, "04", "05", "Advance attacks in state 4; keep hurt/death restrictions")
@@ -411,8 +454,9 @@ def make_rom(source, *, fall, edges):
         hook(0x34D7, "DD 7E 05", "weapon_cull", "Keep swords until all pixels leave the screen", 0xC3)
         hook(0x32CB, "C3 35 75", "weapon_draw", "Clip sword sprites; preserve other weapon drawing", 0xC3)
         hook(0x4500, "3E 06 85", "weapon_collision", "Reject sword collisions after X wraps", 0xC3)
-    c.lines.extend(["; Bank 16 helper bodies, mapped at $A400"] + bodies.lines)
+    c.lines.extend(["; Bank 6 image decompressor and upload adapters"] + codec.lines)
     return bytes(result), dict(source_sha256=SOURCE_SHA256, rom_sha256=hashlib.sha256(result).hexdigest(),
                               rom_bytes=len(result), helper_bytes=len(payload), helper_start=RAM_BASE,
-                              helper_end=RAM_BASE + len(payload), symbols=c.labels,
-                              code_symbols=bodies.labels, changes=changes), c, loader
+                              helper_end=RAM_BASE + ram_chunks[0]["size"], symbols=c.labels,
+                              ram_chunks=ram_chunks, asset_repack=asset_info,
+                              bank6_free_bytes=ATLAS_END - used_end, changes=changes), c, loader

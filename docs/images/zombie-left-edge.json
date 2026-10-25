@@ -1,10 +1,11 @@
 {
   "image": "zombie-left-edge.png",
   "variant": "combined.ips",
-  "rom_sha256": "89bb1e1e4e3950485cd52e4faa5b168a3b570322d0399f23d479a3a85f9a59be",
-  "png_sha256": "3e2f65282484e56f586bdd78dd5a91fb462925365c9caf2fb961dddbd20092cc",
+  "rom_bytes": 131072,
+  "rom_sha256": "b63e21aa3bcf6c21b9f114ed0e04c7e2c7ae567d64c18622851142271c30d0f1",
+  "png_sha256": "b22acb6c2fc5c24a07996737af417512846a45bc7d4ed65c326e2ee69622dae0",
   "method": "ordinary keyboard input from power-on; read-only frame selection; raw emulator screenshot",
-  "emulated_time": 39.434110480521966,
+  "emulated_time": 39.43411020115685,
   "frame": 2363,
   "source": "tools/capture_edge_screenshot.py"
 }

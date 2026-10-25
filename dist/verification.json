@@ -9,9 +9,9 @@
   },
   "rom_sha256": {
     "original": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
-    "fall_attack": "a8df8a577253605a680a9468a753cb701bae5f7939929bdff069e8c705d77918",
-    "screen_edges": "21ee02f2e998745bdbf8cdce9ad66b49f2cc2ed1fcb6f870f99b19e3a453affc",
-    "combined": "89bb1e1e4e3950485cd52e4faa5b168a3b570322d0399f23d479a3a85f9a59be"
+    "fall_attack": "e67184071705b7862c10bf4ec1773ef2c80ad3e4b9d88eaa8c8fb8864fbd7734",
+    "screen_edges": "0085d22ad5c6377d494ec9a025bb938e548fbec5a3bb74aa55939902365b3917",
+    "combined": "b63e21aa3bcf6c21b9f114ed0e04c7e2c7ae567d64c18622851142271c30d0f1"
   },
   "keyboard_smoke": {
     "fall_attack": {

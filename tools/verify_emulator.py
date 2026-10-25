@@ -11,7 +11,7 @@ import json
 import os
 import subprocess
 
-from patches import VARIANTS, RAM_BASE, make_rom
+from patches import VARIANTS, RAM_BASE, RAM_END, SIDE_BASE, SIDE_END, make_rom
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -156,7 +156,7 @@ def tcl_script(fixtures, output):
         encoded.append("{" + f"{f['player']} {{{writes(f['memory'])}}} {{{registers(f['registers'])}}} " +
                        "{" + " ".join("{" + f"{address} {{{writes(memory)}}} {{{registers(regs)}}}" + "}"
                                        for address, memory, regs in f["steps"]) + "} " +
-                       "{" + " ".join(f"{{{x} {y} {v}}}" for x, y, v in f["tiles"]) + "}}")
+                       "{" + " ".join(f"{{{x} {y} {v}}}" for x, y, v in f["tiles"]) + "} " + f["group"] + "}")
     return r'''
 set renderer none
 set throttle off
@@ -183,7 +183,7 @@ proc return_now {} {
  set target [peek16 $sp]
  reg SP [expr {$sp+2}]
  reg IFF 0
- if {$target == 0xf100} {returned} else {reg PC $target}
+ if {$target == 0xf200} {returned} else {reg PC $target}
 }
 proc nextstep {} {
  global fixtures ci si active output
@@ -196,7 +196,7 @@ proc nextstep {} {
  putregs $regs
  reg IFF 0
  debug write memory 0xf0d0 0
- debug write memory 0xf0d1 0xf1
+ debug write memory 0xf0d1 0xf2
  reg SP 0xf0d0
  reg PC $address
 }
@@ -210,6 +210,7 @@ proc nextcase {} {
  }
  set cfg [lindex $fixtures $ci]
  set si -1
+ if {[lindex $cfg 5] eq "asset_vram"} {debug write_block VRAM 0 [binary decode hex [string repeat 5a 131072]]}
  foreach {a n} {0xc420 80 0xc470 256 0xc800 896 0xce00 128 0xc700 32 0xcf00 256 0xd100 768 0xc598 14 0xd700 1024 0xd618 16 0xd460 64} {zero $a $n}
  for {set n 0} {$n<18} {incr n} {debug write memory [expr {0xd638+4*$n}] 224}
  debug write_block memory 0xd3c0 [binary decode hex [string repeat 01 32]]
@@ -225,6 +226,11 @@ proc nextcase {} {
  reg IX 0xc800
  putmem [lindex $cfg 1]
  putregs [lindex $cfg 2]
+ if {[lindex $cfg 5] eq "asset_vram"} {
+  # The original fifth candle upload reads 56 ROM padding bytes and 72 bytes
+  # from C000. Give both ROMs the same explicit input for that incidental data.
+  debug write_block memory 0xc000 [binary decode hex [string repeat 00 72]]
+ }
  debug write memory 0x8000 2
  debug write memory 0xa000 3
  debug write memory 0xf0f2 2
@@ -232,16 +238,17 @@ proc nextcase {} {
  nextstep
 }
 proc returned {} {
- global ci si output
+ global ci si output fixtures
  if {[reg SP] != 0xf0d2} {error "unbalanced stack: [reg SP]"}
  puts $output "$ci\t$si\t[binary encode hex [debug read_block memory 0xc420 80]]\t[binary encode hex [debug read_block memory 0xc410 16]]\t[binary encode hex [debug read_block memory 0xc800 896]]\t[binary encode hex [debug read_block memory 0xd638 72]]\t[binary encode hex [debug read_block memory 0xd4e0 288]]\t[binary encode hex [debug read_block memory 0xc500 128]]\t[reg AF]\t[binary encode hex [debug read_block memory 0xd700 1024]]\t[binary encode hex [debug read_block memory 0xd618 16]]\t[binary encode hex [debug read_block memory 0xd460 64]]"
+ if {[lindex [lindex $fixtures $ci] 5] eq "asset_vram"} {save_debuggable VRAM {VRAM_OUTPUT}}
  nextstep
 }
 proc begin {} {
  global active output
  set active 1
- puts $output "HELPERS\t[binary encode hex [debug read_block memory 0xe640 448]]"
- debug set_bp 0xf100 {} returned
+ puts $output "HELPERS\t[binary encode hex [debug read_block memory 0xe618 488]][binary encode hex [debug read_block memory 0xf100 201]]"
+ debug set_bp 0xf200 {} returned
  debug set_bp 0x509f {$::active} return_now
  debug set_bp 0x0038 {$::active} return_now
  debug set_bp 0x414d {$::active} return_now
@@ -251,7 +258,7 @@ after time 13 {keymatrixdown 8 1}
 after time 13.5 {keymatrixup 8 1}
 after time 24 begin
 after realtime 50 {puts $output "TIMEOUT\t$ci\t$si\t[reg PC]";close $output;exit}
-'''.replace("FIXTURES", "\n".join(encoded)).replace("OUTPUT", output.as_posix())
+'''.replace("FIXTURES", "\n".join(encoded)).replace("VRAM_OUTPUT", output.with_suffix(".vram").as_posix()).replace("OUTPUT", output.as_posix())
 
 
 def run(openmsx, rom, script, outdir, name):
@@ -446,7 +453,7 @@ set output [open {OUTPUT} w]
 set vk_smoke_samples 0
 proc vk_smoke_sample {} {
  global vk_smoke_samples output
- puts $output "[machine_info time]\t[binary encode hex [debug read_block memory 0xc000 4]]\t[binary encode hex [debug read_block memory 0xd000 4]]\t[binary encode hex [debug read_block memory 0xc420 16]]\t[binary encode hex [debug read_block memory 0xe640 SIZE]]"
+ puts $output "[machine_info time]\t[binary encode hex [debug read_block memory 0xc000 4]]\t[binary encode hex [debug read_block memory 0xd000 4]]\t[binary encode hex [debug read_block memory 0xc420 16]]\tREAD_HELPERS"
  incr vk_smoke_samples
  if {$vk_smoke_samples<82} {after time 0.5 vk_smoke_sample} else {close $output;exit}
 }
@@ -465,11 +472,14 @@ after time 45.15 {keymatrixup 8 0x20}
 after time 50 {keymatrixdown 8 1}
 after time 50.2 {keymatrixup 8 1}
 after realtime 30 {close $output;exit}
-'''.replace("OUTPUT", output.as_posix()).replace("SIZE", str(info["helper_bytes"]))
+'''.replace("OUTPUT", output.as_posix()).replace("READ_HELPERS", "".join(
+            f"[binary encode hex [debug read_block memory {chunk['address']} {chunk['size']}]]"
+            for chunk in info["ram_chunks"]))
         run(openmsx, rompath.resolve(), script, outdir, name + "-smoke")
         samples = [line.split("\t") for line in output.read_text().splitlines()]
         assert len(samples) == 82, (name, "smoke timeout")
-        helper = rom[0x20000:0x20000 + info["helper_bytes"]].hex()
+        helper = b"".join(rom[chunk["source_offset"]:chunk["source_offset"] + chunk["size"]]
+                           for chunk in info["ram_chunks"]).hex()
         assert all(s[4] == helper for s in samples), (name, "resident code overwritten")
         gameplay = [s for s in samples if bytes.fromhex(s[1])[0] == 5]
         rooms = sorted({tuple(bytes.fromhex(s[2])[:2]) for s in gameplay})
@@ -499,7 +509,8 @@ def main():
         else:
             fall, edges = VARIANTS[name]
             rom, info, _, _ = make_rom(source, fall=fall, edges=edges)
-            expected_helpers = rom[0x20000:0x20000 + info["helper_bytes"]]
+            expected_helpers = [(chunk, rom[chunk["source_offset"]:chunk["source_offset"] + chunk["size"]])
+                                for chunk in info["ram_chunks"]]
         path = args.out / f"{name}.rom"
         output = args.out / f"{name}.tsv"
         capture_meta = args.out / f"{name}-capture.json"
@@ -513,7 +524,9 @@ def main():
             raise ValueError(f"Capture cache differs from current ROM/fixtures: {name}. Run without --reuse.")
         captures[name] = read_rows(output, fixtures)
         if expected_helpers is not None:
-            assert captures[name][1][:len(expected_helpers)] == expected_helpers, f"Startup installation failed: {name}"
+            for chunk, expected in expected_helpers:
+                offset = chunk["address"] - RAM_BASE if chunk["address"] < SIDE_BASE else RAM_END - RAM_BASE + chunk["address"] - SIDE_BASE
+                assert captures[name][1][offset:offset + len(expected)] == expected, f"Startup installation failed: {name}"
         hashes[name] = hashlib.sha256(rom).hexdigest()
         print(f"{name}: captured {len(captures[name][0])} function returns", flush=True)
     counts = verify(fixtures, captures)

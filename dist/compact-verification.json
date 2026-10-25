@@ -1,0 +1,42 @@
+{
+  "rom_bytes": 131072,
+  "rom_sha256": {
+    "original": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+    "fall_attack": "e67184071705b7862c10bf4ec1773ef2c80ad3e4b9d88eaa8c8fb8864fbd7734",
+    "screen_edges": "0085d22ad5c6377d494ec9a025bb938e548fbec5a3bb74aa55939902365b3917",
+    "combined": "b63e21aa3bcf6c21b9f114ed0e04c7e2c7ae567d64c18622851142271c30d0f1"
+  },
+  "lossless_asset_repack": {
+    "poses": {
+      "poses": 168,
+      "original_bytes": 1029,
+      "packed_bytes": 767,
+      "all_decoded_parts_equal": true
+    },
+    "atlas_bytes": 1536,
+    "compressed_atlas_bytes": 932,
+    "atlas_sha256": "08769c21c7bef2673ad711806b521287d890022c4e2bbfc8a5e72866fac3b695",
+    "all_atlas_bytes_equal": true
+  },
+  "poses_per_rom": 168,
+  "item_candle_vram_bytes": 131072,
+  "all_graphics_equal": true,
+  "previous_release_comparison": {
+    "fall_attack": {
+      "observations": 8875,
+      "all_game_state_and_display_buffers_equal": true
+    },
+    "screen_edges": {
+      "observations": 8875,
+      "all_game_state_and_display_buffers_equal": true
+    },
+    "combined": {
+      "observations": 8875,
+      "all_game_state_and_display_buffers_equal": true
+    }
+  },
+  "limitations": [
+    "arranged function diagnostics",
+    "not hardware or full-campaign verification"
+  ]
+}

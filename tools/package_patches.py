@@ -10,12 +10,18 @@ def main():
     manifest = json.loads((ROOT / "dist/manifest.json").read_text(encoding="utf-8"))
     report_path = ROOT / "build/verification/report.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
+    compact_path = ROOT / "build/compact-verification/report.json"
+    compact = json.loads(compact_path.read_text(encoding="utf-8"))
     for name, data in manifest["variants"].items():
         if data["rom_sha256"] != report["rom_sha256"][name]:
             raise ValueError(f"Verification is for a different ROM: {name}")
+        if data["rom_sha256"] != compact["rom_sha256"][name] or data["rom_bytes"] != 131072:
+            raise ValueError(f"Compact verification is for a different ROM: {name}")
     (ROOT / "dist/verification.json").write_bytes(report_path.read_bytes())
+    (ROOT / "dist/compact-verification.json").write_bytes(compact_path.read_bytes())
     files = [ROOT / "README.md", *sorted((ROOT / "tools").glob("*.py")),
              *sorted((ROOT / "dist").glob("*.ips")), ROOT / "dist/manifest.json", ROOT / "dist/verification.json",
+             ROOT / "dist/compact-verification.json",
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_patches.zip"
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
