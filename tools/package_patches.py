@@ -1,5 +1,6 @@
 """Package verified IPS patches and their complete build/verification sources."""
 from pathlib import Path
+import hashlib
 import json
 import zipfile
 
@@ -19,9 +20,19 @@ def main():
             raise ValueError(f"Compact verification is for a different ROM: {name}")
     (ROOT / "dist/verification.json").write_bytes(report_path.read_bytes())
     (ROOT / "dist/compact-verification.json").write_bytes(compact_path.read_bytes())
+    campaign_path = ROOT / "dist/campaign-verification.json"
+    campaign_inputs = ROOT / "dist/campaign-inputs.json.gz"
+    campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
+    if campaign["status"] != "passed" or not campaign["completed_campaign"]:
+        raise ValueError("A completed campaign verification is required")
+    if campaign["rom_sha256"] != manifest["variants"]["combined"]["rom_sha256"]:
+        raise ValueError("Campaign verification is for a different ROM")
+    if hashlib.sha256(campaign_inputs.read_bytes()).hexdigest() != campaign["input_archive_sha256"]:
+        raise ValueError("Campaign input archive does not match verification")
     files = [ROOT / "README.md", *sorted((ROOT / "tools").glob("*.py")),
              *sorted((ROOT / "dist").glob("*.ips")), ROOT / "dist/manifest.json", ROOT / "dist/verification.json",
              ROOT / "dist/compact-verification.json",
+             campaign_path, campaign_inputs,
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_patches.zip"
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
@@ -31,7 +42,7 @@ def main():
             archive.writestr(entry, path.read_bytes())
     with zipfile.ZipFile(target) as archive:
         assert archive.testzip() is None
-        assert all(not name.lower().endswith(".rom") for name in archive.namelist())
+        assert all(not name.lower().endswith((".rom", ".omr")) for name in archive.namelist())
     print(f"Packaged {len(files)} files: {target.name} ({target.stat().st_size} bytes)")
 
 

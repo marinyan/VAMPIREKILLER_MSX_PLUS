@@ -4,6 +4,8 @@ MSX2版『悪魔城ドラキュラ』の操作と画面端処理を改善するI
 
 **3種類とも適用後のROMは1Mbit（128 KiB／131,072バイト）です。** 画像・音楽・ステージを削除せず、データの可逆圧縮と重複整理で元の容量内へ収めています。
 
+[パッチ・ソース・検証記録一式をZIPでダウンロード](dist/VAMPIREKILLER_MSX_PLUS_patches.zip)
+
 | パッチ | 内容 |
 |---|---|
 | [fall_attack.ips](dist/fall_attack.ips) | 足場から落下している間も鞭・剣・斧・十字架・聖水・砂時計を使用可能にする |
@@ -43,7 +45,13 @@ IPS自体には入力ROMを識別する仕組みがありません。別版や�
 
 openMSX 21.0／C-BIOS MSX2 JPで、原版と3つの改良版をそれぞれ1,653条件・8,875回の関数終了で確認しました。入力RAMとレジスターを設定する関数診断です。移動と着地、BCDハートの消費、武器の枠管理、敵の生成、左右端の描画と消去、小ハートの着地、剣の誤判定、斧・十字架の反転と回収を含みます。
 
-別途、各改良版を電源投入から通常のキー入力だけで63.5秒動かし、屋外3画面と城内3画面を通過しました。全編クリア、全機種、実機での動作は未確認です。結果とROMのハッシュは [検証記録](dist/verification.json) に保存しています。
+別途、各改良版を電源投入から通常のキー入力だけで63.5秒動かし、屋外3画面と城内3画面を通過しました。結果とROMのハッシュは [関数・序盤の検証記録](dist/verification.json) に保存しています。
+
+**両機能入りの1Mbit版は、電源投入から通常キー入力による自動通しプレイでクリアを確認しました。** 全19エリア中139画面、6体のボス、最終ボスの両形態、エンディング全41項目、2周目開始後の右移動まで通過しています。通常の残機再開を1回含みます。途中ステートの復元やゲームRAM・PC・ROMの書換えは使っていません。
+
+同じ入力を別起動で2回再生し、全56,792更新の時刻・入力・ゲーム状態・Rレジスターが記録と一致しました。各再生で追加コード領域を568回照合し、作業RAM 9,344バイトの568サンプルも2回の再生間で一致しました。通しプレイ中には落下と攻撃が同時に進む状態も48更新観測しています。[全編の検証記録](dist/campaign-verification.json) と [再生用入力](dist/campaign-inputs.json.gz) を公開しています。入力ファイルにはROM本体やエミュレーターのステートを含みません。
+
+この確認は同一経路のエミュレーター検証です。全分岐・全装備の組み合わせ、全機種、実機の動作は未確認です。
 
 1Mbit化では、全168ポーズの位置・パターン・色を原版と照合し、初期条件を揃えたアイテム・燭台の読み込み後のVRAM全128 KiBも一致しました。12画像の1,536バイトは932バイトへ可逆圧縮しています。従来の拡張版との比較でも、各版8,875回の観測でゲーム状態と表示用データが一致しました。[容量と画像の検証記録](dist/compact-verification.json)を参照してください。
 
@@ -64,6 +72,14 @@ python tools/verify_patch_files.py path/to/original.rom
 python tools/verify_emulator.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_compact_rom.py path/to/original.rom --openmsx path/to/openmsx.exe
 ```
+
+両機能版の全編入力を、手元の適用済みROMと新しい電源投入状態で再検証できます。
+
+```powershell
+python tools/verify_campaign.py --rom build/combined.rom --inputs dist/campaign-inputs.json.gz --openmsx path/to/openmsx.exe --out build/campaign-replay
+```
+
+`--out` には未作成のフォルダーを指定します。結果はその中の `report.json` に保存されます。再生環境はopenMSX 21.0／C-BIOS MSX2 JPです。配布ZIPにもパッチ、ソース、入力、検証記録をまとめています。
 
 出現例のスクリーンショットも通常操作から再撮影できます。
 
