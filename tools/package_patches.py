@@ -29,7 +29,7 @@ def main():
         raise ValueError("Campaign verification is for a different ROM")
     if hashlib.sha256(campaign_inputs.read_bytes()).hexdigest() != campaign["input_archive_sha256"]:
         raise ValueError("Campaign input archive does not match verification")
-    files = [ROOT / "README.md", *sorted((ROOT / "tools").glob("*.py")),
+    files = [ROOT / "README.md", ROOT / "README.en.md", *sorted((ROOT / "tools").glob("*.py")),
              *sorted((ROOT / "dist").glob("*.ips")), ROOT / "dist/manifest.json", ROOT / "dist/verification.json",
              ROOT / "dist/compact-verification.json",
              campaign_path, campaign_inputs,

@@ -69,7 +69,7 @@ def apply_ips(source, patch):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("rom", type=Path, help="Unmodified 128 KiB Japanese cartridge dump")
+    parser.add_argument("rom", type=Path, help="Unmodified 128 KiB cartridge dump matching the supported SHA-256")
     parser.add_argument("--out", type=Path, default=ROOT / "dist")
     parser.add_argument("--rom-out", type=Path, default=ROOT / "build")
     args = parser.parse_args()

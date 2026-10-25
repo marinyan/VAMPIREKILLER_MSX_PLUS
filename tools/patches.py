@@ -1,4 +1,4 @@
-"""Z80 hooks for the 128 KiB Japanese Vampire Killer cartridge.
+"""Z80 hooks for the supported 128 KiB Vampire Killer cartridge dump.
 
 Only the exact input revision is accepted. Helpers live in E618..E7FF and
 F100..F1C8, outside the game stack, image buffer and BIOS work areas.
