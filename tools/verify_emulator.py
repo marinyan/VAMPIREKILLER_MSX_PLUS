@@ -1,4 +1,4 @@
-"""Run original Z80 routines and the three patched ROMs in openMSX.
+"""Run original Z80 routines and all patched ROM combinations in openMSX.
 
 These are arranged RAM/register function tests, plus a boot/input smoke test.
 No ROM code is replaced at runtime. Sound and IRQ entry are intercepted during
@@ -299,10 +299,10 @@ def read_rows(path, fixtures):
 
 def verify(fixtures, captures):
     counts = {}
-    for name, flags in {"original": (False, False), **VARIANTS}.items():
+    for name, flags in {"original": (False, False, False), **VARIANTS}.items():
         rows, _ = captures[name]
         baseline = captures["original"][0]
-        fall, edges = flags
+        fall, edges, shield = flags
         checks = 0
         for ci, f in enumerate(fixtures):
             m, group = f["metadata"], f["group"]
@@ -438,7 +438,7 @@ def verify(fixtures, captures):
 def smoke_test(openmsx, source, outdir):
     results = {}
     for name, flags in VARIANTS.items():
-        rom, info, _, _ = make_rom(source, fall=flags[0], edges=flags[1])
+        rom, info, _, _ = make_rom(source, fall=flags[0], edges=flags[1], shield=flags[2])
         rompath = outdir / f"{name}.rom"
         rompath.write_bytes(rom)
         output = outdir / f"{name}-smoke.tsv"
@@ -507,8 +507,8 @@ def main():
         if name == "original":
             rom = source
         else:
-            fall, edges = VARIANTS[name]
-            rom, info, _, _ = make_rom(source, fall=fall, edges=edges)
+            fall, edges, shield = VARIANTS[name]
+            rom, info, _, _ = make_rom(source, fall=fall, edges=edges, shield=shield)
             expected_helpers = [(chunk, rom[chunk["source_offset"]:chunk["source_offset"] + chunk["size"]])
                                 for chunk in info["ram_chunks"]]
         path = args.out / f"{name}.rom"

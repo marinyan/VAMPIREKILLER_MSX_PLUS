@@ -16,8 +16,8 @@ def main():
     source = args.rom.read_bytes()
     assert hashlib.sha256(source).hexdigest() == SOURCE_SHA256
     manifest = json.loads((args.dist / "manifest.json").read_text(encoding="utf-8"))
-    for name, (fall, edges) in VARIANTS.items():
-        target, info, _, _ = make_rom(source, fall=fall, edges=edges)
+    for name, (fall, edges, shield) in VARIANTS.items():
+        target, info, _, _ = make_rom(source, fall=fall, edges=edges, shield=shield)
         patch = (args.dist / f"{name}.ips").read_bytes()
         assert patch == ips_patch(source, target), name
         assert apply_ips(source, patch) == target, name
@@ -35,7 +35,7 @@ def main():
                     SIDE_BASE <= chunk["address"] < SIDE_END and chunk["address"] + chunk["size"] <= SIDE_END)
         for invalid in (source[:-1], bytes([source[0] ^ 1]) + source[1:], target):
             try:
-                make_rom(invalid, fall=fall, edges=edges)
+                make_rom(invalid, fall=fall, edges=edges, shield=shield)
             except ValueError:
                 pass
             else:

@@ -1,4 +1,4 @@
-"""Build three IPS patches; the original cartridge is never included."""
+"""Build all IPS patch combinations; the original cartridge is never included."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -75,7 +75,7 @@ def main():
     args = parser.parse_args()
     source = args.rom.read_bytes()
     # Validate before creating output directories.
-    variants = [(name, *make_rom(source, fall=flags[0], edges=flags[1])) for name, flags in VARIANTS.items()]
+    variants = [(name, *make_rom(source, fall=flags[0], edges=flags[1], shield=flags[2])) for name, flags in VARIANTS.items()]
     args.out.mkdir(parents=True, exist_ok=True)
     args.rom_out.mkdir(parents=True, exist_ok=True)
     manifest = {"format": "IPS", "variants": {}}

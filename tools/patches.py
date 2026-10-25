@@ -18,7 +18,15 @@ SIDE_END = 0xF1C9
 LOADER_OFFSET = 0x7FC0
 LOADER_ADDRESS = 0xBFC0
 OUTPUT_SIZE = 0x20000
-VARIANTS = {"fall_attack": (True, False), "screen_edges": (False, True), "combined": (True, True)}
+VARIANTS = {
+    "fall_attack": (True, False, False),
+    "screen_edges": (False, True, False),
+    "combined": (True, True, False),
+    "shield_fix": (False, False, True),
+    "fall_attack_shield": (True, False, True),
+    "screen_edges_shield": (False, True, True),
+    "combined_shield": (True, True, True),
+}
 
 
 class Code:
@@ -79,7 +87,7 @@ class Code:
         return bytes(self.data)
 
 
-def helpers(fall, edges):
+def helpers(fall, edges, shield=False):
     c = Code(RAM_BASE)
     if fall:
         c.label("special_state")
@@ -333,6 +341,19 @@ def helpers(fall, edges):
         c.emit("FD 7E 0F B7 C0", "ld a,(iy+15) / or a / ret nz ; carry clear")
         c.label("weapon_collision_original")
         c.jp(0x8504)
+    if shield:
+        c.label("shield_stage_clear")
+        c.emit("F5 3A 41 C4 F5", "push af / ld a,($C441) / push af")
+        c.call(0x63B7)
+        c.emit("F1 32 41 C4", "pop af / ld ($C441),a ; carry remaining durability across area entry")
+        c.call("shield_inventory")
+        c.emit("F1 C9", "pop af / ret")
+        c.label("shield_inventory")
+        c.emit("3A 41 C4 B7 3A 01 C7 C0", "ld a,($C441) / or a / ld a,($C701) / ret nz")
+        c.emit("E6 CF 32 01 C7 C9", "and $CF / ld ($C701),a / ret ; exhausted shields cannot wrap to255")
+        c.label("shield_projectiles_done")
+        c.call(0x8EE6)
+        c.emit("C1 C9", "pop bc / ret ; stop the collision pass when the shield breaks")
     return c, bytes(c.data)
 
 
@@ -367,12 +388,12 @@ def image_loader(address, packed_atlas):
     return c
 
 
-def make_rom(source, *, fall, edges):
+def make_rom(source, *, fall, edges, shield=False):
     if len(source) != 0x20000 or hashlib.sha256(source).hexdigest() != SOURCE_SHA256:
         raise ValueError("Unsupported input ROM. Expected 128 KiB SHA-256 " + SOURCE_SHA256)
-    if not (fall or edges):
+    if not (fall or edges or shield):
         raise ValueError("Select at least one improvement")
-    c, _ = helpers(fall, edges)
+    c, _ = helpers(fall, edges, shield)
     if edges:
         c.labels["spawn_original"] = 0x5F1D
     payload = c.finish()
@@ -454,8 +475,14 @@ def make_rom(source, *, fall, edges):
         hook(0x34D7, "DD 7E 05", "weapon_cull", "Keep swords until all pixels leave the screen", 0xC3)
         hook(0x32CB, "C3 35 75", "weapon_draw", "Clip sword sprites; preserve other weapon drawing", 0xC3)
         hook(0x4500, "3E 06 85", "weapon_collision", "Reject sword collisions after X wraps", 0xC3)
+    if shield:
+        hook(0x22EC, "CD B7 63", "shield_stage_clear", "Preserve shield durability during area entry")
+        hook(0x4179, "3A 01 C7", "shield_inventory", "Reject an exhausted contact shield before reducing damage")
+        hook(0x4610, "3A 01 C7", "shield_inventory", "Reject an exhausted projectile shield before collision checks")
+        hook(0x463F, "CD E6 8E", "shield_projectiles_done", "Stop blocking further projectiles after the final shield use", 0xC3)
     c.lines.extend(["; Bank 6 image decompressor and upload adapters"] + codec.lines)
     return bytes(result), dict(source_sha256=SOURCE_SHA256, rom_sha256=hashlib.sha256(result).hexdigest(),
+                              features=dict(fall_attack=fall, screen_edges=edges, shield_fix=shield),
                               rom_bytes=len(result), helper_bytes=len(payload), helper_start=RAM_BASE,
                               helper_end=RAM_BASE + ram_chunks[0]["size"], symbols=c.labels,
                               ram_chunks=ram_chunks, asset_repack=asset_info,

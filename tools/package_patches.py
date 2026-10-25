@@ -13,13 +13,20 @@ def main():
     report = json.loads(report_path.read_text(encoding="utf-8"))
     compact_path = ROOT / "build/compact-verification/report.json"
     compact = json.loads(compact_path.read_text(encoding="utf-8"))
+    shield_path = ROOT / "build/shield-verification/report.json"
+    shield = json.loads(shield_path.read_text(encoding="utf-8"))
+    if shield["status"] != "passed" or not shield["original_zero_to_255_bug_reproduced"]:
+        raise ValueError("Shield regression verification is required")
     for name, data in manifest["variants"].items():
         if data["rom_sha256"] != report["rom_sha256"][name]:
             raise ValueError(f"Verification is for a different ROM: {name}")
         if data["rom_sha256"] != compact["rom_sha256"][name] or data["rom_bytes"] != 131072:
             raise ValueError(f"Compact verification is for a different ROM: {name}")
+        if data["rom_sha256"] != shield["rom_sha256"][name]:
+            raise ValueError(f"Shield verification is for a different ROM: {name}")
     (ROOT / "dist/verification.json").write_bytes(report_path.read_bytes())
     (ROOT / "dist/compact-verification.json").write_bytes(compact_path.read_bytes())
+    (ROOT / "dist/shield-verification.json").write_bytes(shield_path.read_bytes())
     campaign_path = ROOT / "dist/campaign-verification.json"
     campaign_inputs = ROOT / "dist/campaign-inputs.json.gz"
     campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
@@ -32,6 +39,7 @@ def main():
     files = [ROOT / "README.md", ROOT / "README.en.md", *sorted((ROOT / "tools").glob("*.py")),
              *sorted((ROOT / "dist").glob("*.ips")), ROOT / "dist/manifest.json", ROOT / "dist/verification.json",
              ROOT / "dist/compact-verification.json",
+             ROOT / "dist/shield-verification.json",
              campaign_path, campaign_inputs,
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_patches.zip"

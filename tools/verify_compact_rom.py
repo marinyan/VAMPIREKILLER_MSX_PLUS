@@ -46,7 +46,7 @@ def main():
     fixtures = asset_cases(source)
     captures, vram, hashes = {}, {}, {}
     for name in ("original", *VARIANTS):
-        rom = source if name == "original" else make_rom(source, fall=VARIANTS[name][0], edges=VARIANTS[name][1])[0]
+        rom = source if name == "original" else make_rom(source, fall=VARIANTS[name][0], edges=VARIANTS[name][1], shield=VARIANTS[name][2])[0]
         assert len(rom) == 131072
         rompath, output = out / f"{name}.rom", out / f"{name}.tsv"
         rompath.write_bytes(rom)
@@ -65,6 +65,8 @@ def main():
         gameplay_fixtures = cases()
         baseline_result = {}
         for name in VARIANTS:
+            if VARIANTS[name][2] and not (args.baseline / f"{name}.tsv").exists():
+                continue
             old, _ = read_rows(args.baseline / f"{name}.tsv", gameplay_fixtures)
             new, _ = read_rows(ROOT / "build/verification" / f"{name}.tsv", gameplay_fixtures)
             assert old.keys() == new.keys()
