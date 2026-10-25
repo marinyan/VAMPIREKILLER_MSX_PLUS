@@ -1,0 +1,42 @@
+"""Check IPS round trips, patch scope, determinism, and revision guards."""
+from pathlib import Path
+import argparse
+import hashlib
+import json
+
+from build_patches import apply_ips, ips_patch
+from patches import VARIANTS, make_rom, SOURCE_SHA256, RAM_BASE, RAM_END
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("rom", type=Path)
+    parser.add_argument("--dist", type=Path, default=Path(__file__).resolve().parents[1] / "dist")
+    args = parser.parse_args()
+    source = args.rom.read_bytes()
+    assert hashlib.sha256(source).hexdigest() == SOURCE_SHA256
+    manifest = json.loads((args.dist / "manifest.json").read_text(encoding="utf-8"))
+    for name, (fall, edges) in VARIANTS.items():
+        target, info, _, _ = make_rom(source, fall=fall, edges=edges)
+        patch = (args.dist / f"{name}.ips").read_bytes()
+        assert patch == ips_patch(source, target), name
+        assert apply_ips(source, patch) == target, name
+        assert manifest["variants"][name]["rom_sha256"] == info["rom_sha256"], name
+        touched = set()
+        for change in info["changes"]:
+            touched.update(range(change["offset"], change["offset"] + change["size"]))
+        assert all(a == b or index in touched for index, (a, b) in enumerate(zip(source, target))), name
+        assert info["helper_start"] == RAM_BASE and info["helper_end"] <= RAM_END, name
+        assert len(patch) < 4096 and len(target) == 262144, name
+        for invalid in (source[:-1], bytes([source[0] ^ 1]) + source[1:], target):
+            try:
+                make_rom(invalid, fall=fall, edges=edges)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("Revision guard accepted unsupported ROM")
+        print(f"PASS {name}: IPS round trip, deterministic build, scoped changes, input guard")
+
+
+if __name__ == "__main__":
+    main()

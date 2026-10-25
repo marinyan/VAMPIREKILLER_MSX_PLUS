@@ -1,0 +1,7 @@
+.local/
+build/
+.cache/
+__pycache__/
+*.pyc
+*.rom
+*.ROM

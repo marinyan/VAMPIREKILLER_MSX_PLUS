@@ -1,0 +1,118 @@
+{
+  "kind": "arranged Z80 function diagnostics",
+  "cases_per_rom": 1653,
+  "checks": {
+    "original": 1653,
+    "fall_attack": 1653,
+    "screen_edges": 1653,
+    "combined": 1653
+  },
+  "rom_sha256": {
+    "original": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+    "fall_attack": "a8df8a577253605a680a9468a753cb701bae5f7939929bdff069e8c705d77918",
+    "screen_edges": "21ee02f2e998745bdbf8cdce9ad66b49f2cc2ed1fcb6f870f99b19e3a453affc",
+    "combined": "89bb1e1e4e3950485cd52e4faa5b168a3b570322d0399f23d479a3a85f9a59be"
+  },
+  "keyboard_smoke": {
+    "fall_attack": {
+      "samples": 82,
+      "gameplay_samples": 78,
+      "visited_area_rooms": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "resident_code_unchanged": true,
+      "scope": "power-on and ordinary keyboard input, 63.5 emulated seconds"
+    },
+    "screen_edges": {
+      "samples": 82,
+      "gameplay_samples": 78,
+      "visited_area_rooms": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "resident_code_unchanged": true,
+      "scope": "power-on and ordinary keyboard input, 63.5 emulated seconds"
+    },
+    "combined": {
+      "samples": 82,
+      "gameplay_samples": 78,
+      "visited_area_rooms": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "resident_code_unchanged": true,
+      "scope": "power-on and ordinary keyboard input, 63.5 emulated seconds"
+    }
+  },
+  "restrictions": [
+    "not a full campaign playthrough",
+    "not hardware verification"
+  ]
+}
