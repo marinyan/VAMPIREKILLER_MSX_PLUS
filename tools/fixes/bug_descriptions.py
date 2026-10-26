@@ -171,6 +171,29 @@ DESCRIPTIONS = {
         trigger_en="A newly released carried jumper is in its initial descent and has not yet reached a supporting floor.",
         correction_ja="床がなければ重力の更新だけを続け、支持が得られた場合だけ既存の着地処理へ進めます。本当の着地時の丸め・停止・2更新の待機と、その後のジャンプは維持します。",
         correction_en="Continue gravity updates without landing until support exists. Preserve actual landing alignment, stopping, the two-update pause, and subsequent jumps.")),
+    "water_pending": ("聖水と発射待ちの剣が同じ枠を使う", "Holy-water and pending-throw overlap", "発射待ちの剣を聖水で上書きせず、無駄なハート消費も防ぎます。", "Keep holy water from overwriting a pending sword or wasting its heart cost.", Explanation(
+        symptom_ja="剣を続けて投げる途中で聖水を使うと、2本目の剣の発射予約へ聖水が入り、剣が聖水に変わったり、出した聖水が剣に上書きされたりします。後者ではハートだけ5個消費します。",
+        symptom_en="Using holy water while a second sword is waiting to launch lets both attacks claim the same slot. The sword can become water, or the water can be overwritten by a sword after consuming five hearts.",
+        trigger_ja="空中で剣を2回続けて投げ、2本目の発射待ちから発射直前までの間に、聖水を使う方向入力を行います。左右両方向が対象です。",
+        trigger_en="Throw two swords in succession while airborne, then request holy water while the second throw is pending or about to launch. Either direction can trigger it.",
+        correction_ja="現在の投擲攻撃が2番目の枠を使う間は、聖水の使用とハート消費を受け付けません。1番目の枠から発射できる場合、攻撃中でない場合、通常の聖水使用は維持します。",
+        correction_en="Reject holy water and its heart cost while the current projectile attack needs the second slot. Preserve ordinary water use, attacks completing from the first slot, and inactive stale records.",
+        notes_ja="従来の「落下中の武器使用」にも競合防止を含みます。この項目なら、落下中の攻撃制限を変えずに単独で修正できます。両方を選んだ場合は共通の確認を1回だけ行います。",
+        notes_en="The earlier Weapons during falls item also protects pending throws. This item applies the correction independently while retaining the original falling-attack restriction. Selecting both performs a single shared check.")),
+    "actor_order": ("敵の生成で同じ敵が二度動く", "Actor scan order after spawning", "敵や小ハートの生成で走査位置が戻り、同じ敵を二度更新するのを防ぎます。", "Keep a spawn from rewinding the scan and updating an actor twice.", Explanation(
+        symptom_ja="敵の消滅演出から小ハートなどを生成すると、空いた別の枠へ処理位置が移り、その位置から敵の走査まで再開します。その結果、生存している敵が同じ更新内で二度動いたり、待ち時間が二度減ったりします。",
+        symptom_en="Spawning a heart or another actor can change the current record pointer and rewind the outer scan. Surviving enemies can then move twice or lose two timer counts in one update.",
+        trigger_ja="後ろの枠で処理中の敵や消滅演出が、前方の空き枠へ新しいものを生成する場面です。後方に生成されたものを、その更新で余分に動かす問題も対象です。",
+        trigger_en="An actor or death effect processed in a later record allocates an earlier free record. New actors allocated later in the scan also require protection against an extra AI update.",
+        correction_ja="元の7枠を順番に一度ずつ調べます。生成直後に元々行われる移動と画面端の処理を残した後で走査位置を戻し、新しく生まれたもののAIは次の更新まで待ちます。生成失敗時の解放処理や時止めとの併用にも対応します。",
+        correction_en="Visit the seven original records in order once. Keep the existing immediate movement and edge processing on the returned newborn before restoring the scan owner, and defer the newborn's AI until the next update. Preserve allocation-failure cleanup and time-stop handling.")),
+    "phantom_gate": ("門のない部屋の左上で引っ掛かる", "Phantom gate at the screen origin", "門のない部屋で、左上の架空の門が移動を妨げないようにします。", "Do not let a nonexistent gate block movement near the upper-left corner.", Explanation(
+        symptom_ja="門のない部屋では門の座標が0になりますが、移動処理が門の有無を確認しないため、左上に見えない門があるように一時的に止まります。左向きのジャンプなどで発生します。",
+        symptom_en="Rooms without a gate leave its coordinates at zero, but movement still tests those coordinates as a real gate. Leftward jumps near the upper-left corner can briefly stick against an invisible boundary.",
+        trigger_ja="門のない部屋の左上へ向かい、X8〜15・Y2〜49付近を左向きに通過する場面です。位置や向きが範囲外になると動けます。",
+        trigger_en="Move left near X8–15 and Y2–49 in a room without a gate. Movement resumes after the position or direction leaves the affected range.",
+        correction_ja="門が存在しない場合だけ門への接触確認を省略し、そのまま通常の横移動へ進めます。実在する門の開閉、停止範囲、通過タイミングや通常の壁は変えません。",
+        correction_en="Skip only the gate collision query when no gate exists, then continue ordinary movement. Preserve actual gates, their open/closed states, blocking bounds, transition timing, and ordinary walls.")),
 }
 
 

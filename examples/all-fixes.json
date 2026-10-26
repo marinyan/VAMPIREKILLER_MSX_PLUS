@@ -26,6 +26,9 @@
     "hurt_clip",
     "water_edge",
     "bat_y",
-    "jumper_land"
+    "jumper_land",
+    "water_pending",
+    "actor_order",
+    "phantom_gate"
   ]
 }

@@ -70,6 +70,15 @@ def main():
         raise ValueError("The generator distribution must not contain prebuilt IPS files")
     campaign_path = ROOT / "dist/campaign-verification.json"
     campaign_inputs = ROOT / "dist/campaign-inputs.json.gz"
+    route_path = ROOT / "dist/expanded-route-verification.json"
+    route_inputs = ROOT / "dist/expanded-route-inputs.json.gz"
+    route = json.loads(route_path.read_text(encoding="utf-8"))
+    if (route["status"] != "passed" or not route["replay_matches_source"]
+            or route["rom_sha256"] != all_build["rom_sha256"]
+            or route["selected_fixes"] != expected_ids
+            or not route["independent_work_RAM_match"]
+            or hashlib.sha256(route_inputs.read_bytes()).hexdigest() != route["input_archive_sha256"]):
+        raise ValueError("Current ordinary-input route replay verification is required")
     campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
     if campaign["status"] != "passed" or not campaign["completed_campaign"]:
         raise ValueError("A completed campaign verification is required")
@@ -86,7 +95,7 @@ def main():
              ROOT / "dist/selector-verification.json",
              ROOT / "dist/bug-verification.json", ROOT / "dist/expanded-verification.json",
              ROOT / "dist/expanded-shield-verification.json",
-             campaign_path, campaign_inputs,
+             campaign_path, campaign_inputs, route_path, route_inputs,
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_generator.zip"
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:

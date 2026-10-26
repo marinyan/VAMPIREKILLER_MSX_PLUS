@@ -15,13 +15,16 @@ def main():
  p.add_argument('--out',type=Path,required=True)
  p.add_argument('--partial',action='store_true')
  p.add_argument('--rom',type=Path,default=Path('build/combined.rom'))
+ p.add_argument('--source-rom',type=Path,help='Original ROM for verifying a selectable build')
+ p.add_argument('--config',type=Path,help='Selection JSON; requires --source-rom')
  p.add_argument('--openmsx',type=Path,default=Path('.local/openmsx/openmsx.exe'))
  a=p.parse_args();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
+ if bool(a.source_rom)!=bool(a.config):p.error('--source-rom and --config must be supplied together')
  if a.inputs:
   assert a.recording is None and a.baseline is None
   data=json.loads(gzip.decompress(a.inputs.read_bytes()))
   assert data['format']=='vampire-killer-msx-keyboard-v1' and data['initial_time']==0 and data['initial_PC']==0
-  assert data['rom_sha256']==sha(a.rom) and data['rom_bytes']==a.rom.stat().st_size==131072
+  assert data['rom_sha256']==sha(a.rom) and data['rom_bytes']==a.rom.stat().st_size
   a.baseline=out/'reference.tsv';a.baseline.write_text(data['trace_tsv'],encoding='utf-8')
   sys.path.insert(0,str(ROOT/'tools'))
   from verify_emulator import run
@@ -72,8 +75,15 @@ after time 0.1 {reverse savereplay -maxnofextrasnapshots 0 @SEED@;exit}
    if tokens[0].startswith('keymatrix'):assert tokens[1]=='8' and 0<=int(tokens[2])<=255
  with a.baseline.open() as f:limit=sum(1 for _ in f)-1
  assert limit>0
- manifest=json.loads((ROOT/'dist/manifest.json').read_text())['variants']['combined']
- assert sha(a.rom)==manifest['rom_sha256'] and a.rom.stat().st_size==131072
+ if a.config:
+  sys.path.insert(0,str(ROOT/'tools'))
+  from patches import make_selected_rom
+  from selection_build import read_config
+  target,manifest,_,_=make_selected_rom(a.source_rom.read_bytes(),read_config(a.config))
+  assert a.rom.read_bytes()==target,'ROM does not match the supplied source and selection'
+ else:
+  manifest=json.loads((ROOT/'dist/manifest.json').read_text())['variants']['combined']
+  assert sha(a.rom)==manifest['rom_sha256'] and a.rom.stat().st_size==131072
  rom=a.rom.read_bytes();checks='\n'.join('if {[binary encode hex [debug read_block memory %d %d]] ne "%s"} {finish resident-corruption;return}'%(c['address'],c['size'],rom[c['source_offset']:c['source_offset']+c['size']].hex())for c in manifest['ram_chunks'])
  rel=lambda x:os.path.relpath(x,ROOT).replace('\\','/')
  tcl=r'''
@@ -156,6 +166,7 @@ after realtime 150 {finish host-time-limit}
  report=dict(status='passed'if matched and (complete or a.partial) else'failed',scope='partial input delivery'if a.partial else'complete campaign replay',completed_campaign=complete,replay_matches_source=matched,rom_bytes=len(rom),rom_sha256=sha(a.rom),recording_sha256=sha(a.recording),source_trace_sha256=sha(a.baseline),replay_trace_sha256=sha(out/'polls.tsv'),updates=rows,compared_fields=fields+['time'],differences=differences,areas=sorted(areas),visited_screens=len(rooms),bosses_defeated=sorted(bosses),credits_seen=sorted(credits),final=last,finish=finish,event_types=event_types,initial_snapshot_time=0,initial_PC=0,initial_snapshot_loads=1,midgame_restores=0,game_RAM_PC_ROM_writes=0,host_seconds=round(time.monotonic()-start,3))
  report['work_RAM_samples']=[dict(index=int(n),sha256=hashlib.sha256(bytes.fromhex(raw)).hexdigest())for n,raw in (line.split()for line in (out/'ram-samples.tsv').read_text().splitlines())]
  report.update(input_archive_sha256=sha(a.inputs)if a.inputs else None,
+               selected_fixes=manifest.get('selected_fixes',['fall_attack','screen_edges']),
                fresh_power_on_seed=bool(a.inputs),final_boss_phases=sorted(final_boss_phases),
                falling_with_attack_updates=fall_attack_updates,ordinary_death_sequences=deaths)
  (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')

@@ -36,8 +36,9 @@ def apply(edit, hook, c):
     edit(0x31E9, "04", "05", "Advance attacks in state 4; keep hurt/death restrictions")
     pose = b"\xcd" + struct.pack("<H", c.labels["fall_pose"]) + b"\x00" * 7
     edit(0x2F48, "11 00 00 ED 53 2E C4 CD 5F 76", pose, "Preserve active attack poses during falling")
-    hook(0x3194, "3A 61 C4", "holy_water_slot", "Guard and clear left holy-water slot")
-    hook(0x31A1, "3A 61 C4", "holy_water_slot", "Guard and clear right holy-water slot")
+    if "water_pending" not in getattr(c, "enabled", ()):
+        hook(0x3194, "3A 61 C4", "holy_water_slot", "Guard and clear left holy-water slot")
+        hook(0x31A1, "3A 61 C4", "holy_water_slot", "Guard and clear right holy-water slot")
 
 
 FIX = Fix(

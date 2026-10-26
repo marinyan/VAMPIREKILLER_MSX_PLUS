@@ -45,7 +45,7 @@ The generator checks the input size and hash before building. IPS itself does no
 
 ## Available items
 
-The current tool covers 26 bugs plus the screen-edge behavior improvement. The two shield bugs share one checkbox, leaving 26 selectable items. The catalog is extensible and has no fixed item count.
+The current tool covers 29 bugs plus the screen-edge behavior improvement. The two shield bugs share one checkbox, leaving 29 selectable items. The catalog is extensible and has no fixed item count.
 
 | ID | Item |
 |---|---|
@@ -75,6 +75,11 @@ The current tool covers 26 bugs plus the screen-edge behavior improvement. The t
 | `water_edge` | Holy-water edge equipment loss |
 | `bat_y` | Ceiling-bat descent height |
 | `jumper_land` | Carried jumper landing |
+| `water_pending` | Holy-water and pending-throw overlap |
+| `actor_order` | Actor scan order after spawning |
+| `phantom_gate` | Phantom gate at the screen origin |
+
+The earlier Weapons during falls item also protects pending throws. `water_pending` makes this correction independently selectable without enabling falling attacks. Selecting both is supported.
 
 Full symptoms and triggers appear in the tool and the [catalog JSON](dist/catalog.json). Axes and crosses still turn back at the screen edges.
 
@@ -82,7 +87,7 @@ Full symptoms and triggers appear in the tool and the [catalog JSON](dist/catalo
 
 ## Verification scope
 
-The 23 new items were checked in 25 configurations: original, each new item alone, and all items together. Each ran 4,517 cases and 4,814 function returns in openMSX 21.0 / C-BIOS MSX2 JP. These are arranged function/segment diagnostics using the original cartridge routines with input RAM/registers. They cover disabled controls, shared projectile metadata, two-slot collisions, allocation rollback, and area transitions combining shields and time stop. See the [bug verification record](dist/bug-verification.json).
+The 26 new items were checked in 28 configurations: original, each new item alone, and all items together. Each ran 5,895 cases and 6,612 function returns in openMSX 21.0 / C-BIOS MSX2 JP. These are arranged function/segment diagnostics using the original cartridge routines with input RAM/registers. They cover disabled controls, shared projectile metadata, two-slot collisions, allocation rollback, and area transitions combining shields and time stop. See the [bug verification record](dist/bug-verification.json).
 
 For the all-items build, all 98,304 bytes in the original asset banks remain unchanged. All 168 pose position/pattern/color transfers and all 128 KiB of VRAM after item/candle upload match the original. A separate 63.5-second run from power-on using ordinary keyboard input traversed three outdoor and three castle screens and checked resident code in 82 samples. See the [size, graphics, and opening-input record](dist/expanded-verification.json).
 
@@ -91,6 +96,8 @@ The original and all-items build also passed 478 shield cases and 582 function r
 The seven selections using only the original three items reproduce their previous IPS and ROM hashes. Their [hashes](dist/manifest.json), [function diagnostics](dist/verification.json), [graphics checks](dist/compact-verification.json), and [shield diagnostics](dist/shield-verification.json) remain available. Public build records do not contain original data bytes.
 
 The earlier full-campaign run applies to the 1 Mbit falling-attack + screen-edge selection. It visited all 19 areas and 139 screens, defeated six bosses including both final forms, observed 41 ending entries and the next loop, and matched all 56,792 updates in two independent replays. The [campaign report](dist/campaign-verification.json) and [ROM-free input archive](dist/campaign-inputs.json.gz) are retained.
+
+A separate ordinary-keyboard route reached 34 screens across areas 0–6 and defeated the first boss. The controller stopped after lethal damage in area 6. Both a recording replay and a fresh power-on input replay matched the 9,329 sampled updates and 94 work-RAM samples. The [partial-route record](dist/expanded-route-verification.json) and [ROM-free inputs](dist/expanded-route-inputs.json.gz) are included. Matching these samples does not establish a full clear or replay of the final lethal update.
 
 **The new all-items build has not been tested through a full campaign or on physical hardware.** Function diagnostics and opening-section input checks do not establish a full clear.
 
@@ -102,6 +109,7 @@ python tools/verify_bugs.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_expanded.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_shield.py path/to/original.rom --openmsx path/to/openmsx.exe --all-fixes --out build/expanded-shield-verification
 python tools/verify_selector.py path/to/original.rom
+python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/all-fixes.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay --partial
 ```
 
 Results and diagnostic ROMs stay in your local `build/`. Use `--skip-gui` for selector checks without a windowing environment; the report records that GUI checks were skipped.

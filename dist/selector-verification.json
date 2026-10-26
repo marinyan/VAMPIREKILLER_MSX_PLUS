@@ -29,9 +29,12 @@
     "hurt_clip",
     "water_edge",
     "bat_y",
-    "jumper_land"
+    "jumper_land",
+    "water_pending",
+    "actor_order",
+    "phantom_gate"
   ],
-  "all_fixes_rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+  "all_fixes_rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
   "matches_published_patches": {
     "fall_attack": "e67184071705b7862c10bf4ec1773ef2c80ad3e4b9d88eaa8c8fb8864fbd7734",
     "screen_edges": "0085d22ad5c6377d494ec9a025bb938e548fbec5a3bb74aa55939902365b3917",

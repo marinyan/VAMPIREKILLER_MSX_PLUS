@@ -1,7 +1,7 @@
 {
   "status": "passed",
   "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
-  "rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+  "rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
   "rom_bytes": 262144,
   "selected_fixes": [
     "fall_attack",
@@ -29,20 +29,23 @@
     "hurt_clip",
     "water_edge",
     "bat_y",
-    "jumper_land"
+    "jumper_land",
+    "water_pending",
+    "actor_order",
+    "phantom_gate"
   ],
   "original_asset_bank_bytes_unchanged": 98304,
   "asset_banks_unchanged": true,
   "asset_recompression": false,
   "poses_equal": 168,
   "item_candle_vram_bytes_equal": 131072,
-  "resident_bytes": 968,
-  "extension_code_bytes": 873,
-  "extension_free_bytes": 6351,
+  "resident_bytes": 989,
+  "extension_code_bytes": 1051,
+  "extension_free_bytes": 6152,
   "smoke": {
     "all": {
       "samples": 82,
-      "gameplay_samples": 78,
+      "gameplay_samples": 76,
       "visited_area_rooms": [
         [
           0,

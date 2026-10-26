@@ -33,6 +33,9 @@ from fixes.hurt_clip import FIX as HURT_CLIP
 from fixes.water_edge import FIX as WATER_EDGE
 from fixes.bat_y import FIX as BAT_Y
 from fixes.jumper_land import FIX as JUMPER_LAND
+from fixes.water_pending import FIX as WATER_PENDING
+from fixes.actor_order import FIX as ACTOR_ORDER
+from fixes.phantom_gate import FIX as PHANTOM_GATE
 from patches import SOURCE_SHA256, make_selected_rom
 from verify_emulator import read_rows, run, tcl_script
 
@@ -40,7 +43,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NEW_FIXES = (STAIRS, TRAP_CONTACT, TRAP_ATTACK, PATROL_TIMER, MUMMY_START, REFORM_HP, STUN_HP, HOURGLASS,
              ACTOR_ALLOC, PROJECTILE_ALLOC, EMPTY_PROJECTILE, PROJECTILE_BOX, CROUCH_FALL, PLATFORM_LAND,
              PLATFORM_TURN, SHOP_INPUT, BOSS_SPAWN, WEAPON_OWNER, AXE_WALL, HURT_CLIP,
-             WATER_EDGE, BAT_Y, JUMPER_LAND)
+             WATER_EDGE, BAT_Y, JUMPER_LAND, WATER_PENDING, ACTOR_ORDER, PHANTOM_GATE)
 
 
 def fixtures():
@@ -251,6 +254,81 @@ def fixtures():
                 actor[7:9] = velocity.to_bytes(2, "little")
                 add("jumper_land", 0xB268, memory={0xC800: actor.hex()}, y=y, supported=supported,
                     tiles=[(tile_x, y & 248, 1 if supported else 0) for tile_x in (112, 120, 128, 136)])
+    for first in ((0, 0), (1, 0), (1, 2), (2, 2)):
+        for second in ((0, 0), (1, 0), (2, 5)):
+            for attack in range(5):
+                for weapon in range(5):
+                    for direction, address in ((1, 0x7194), (0, 0x71A1)):
+                        player = bytearray(80)
+                        player[0], player[2], player[22] = 1, attack, weapon
+                        player[48:50], player[64:66] = bytes(first), bytes(second)
+                        for base in (48, 64):
+                            player[base + 13:base + 16] = bytes([255]) * 3
+                        add("water_pending", address, player=player, memory={0xC417: 0x30},
+                            first=first, second=second, attack=attack, weapon=weapon, direction=direction)
+    for direction in (4, 8):
+        for water_tick, second_sword, inventory in ((6, True, 8), (7, True, 8), (8, True, 8),
+                                                     (None, True, 8), (6, False, 8), (6, True, 0)):
+            player = bytearray(80)
+            player[5], player[7] = 192, 80
+            steps, inputs = [], []
+            for tick in range(12):
+                mask = 32 if tick == 0 else 16 if tick == 1 or tick == 5 and second_sword else 0
+                if tick == water_tick:
+                    mask = direction
+                inputs.append(mask)
+                steps.extend([(0x6B39, {0xC006: mask, 0xC007: mask, 0xC003: tick}, {}),
+                              (0x710D, {}, {}), (0x6B27, {}, {})])
+            add("water_pending_sequence", 0x6B39, player=player,
+                memory={0xC416: 2, 0xC417: 0x30, 0xC701: inventory}, steps=steps,
+                direction=direction, water_tick=water_tick, second_sword=second_sword,
+                inventory=inventory, inputs=inputs)
+    for owner in range(7):
+        for empty in (None, *[slot for slot in range(7) if slot != owner]):
+            for expire in (False, True):
+                for free_parts in (0, 14):
+                    actors = bytearray(896)
+                    for slot in range(7):
+                        base = slot * 128
+                        actors[base], actors[base + 3], actors[base + 5], actors[base + 12] = 0x1E, 80, 128, 31 + slot
+                    if empty is not None:
+                        actors[empty * 128] = 0
+                    actors[owner * 128 + 12], actors[owner * 128 + 31] = (1 if expire else 2), 1
+                    sat = bytearray(72)
+                    for index in range(18):
+                        sat[index * 4] = 224 if index < free_parts else 64
+                    add("actor_order", 0x98EC, memory={0xC800: actors.hex(), 0xD638: sat.hex()},
+                        initial=actors.hex(), owner=owner, empty=empty, expire=expire, free_parts=free_parts)
+    for owner in (0, 2, 5):
+        for clock in (0, 1):
+            actors = bytearray(896)
+            for slot in range(owner):
+                base = slot * 128
+                actors[base], actors[base + 3], actors[base + 5], actors[base + 12] = 0x1E, 80, 128, 31
+            base = owner * 128
+            actors[base], actors[base + 3], actors[base + 5], actors[base + 6], actors[base + 126] = 2, 192, 128, 1, 1
+            add("actor_order_water", 0x98EC, memory={0xC800: actors.hex(), 0xD010: clock},
+                initial=actors.hex(), owner=owner, clock=clock,
+                tiles=[(x, 192, 0) for x in (112, 120, 128, 136, 144)])
+    for expire in (False, True):
+        for timer in (31, 32):
+            actors = bytearray(896)
+            actors[128], actors[129], actors[131], actors[133], actors[137], actors[138] = 0x10, 3, 176, 135, 192, 254
+            actors[141], actors[142], actors[143], actors[144], actors[145] = 8, 7, 0x52, 1, timer
+            actors[256], actors[259], actors[261], actors[268], actors[287] = 0x1E, 80, 128, 1 if expire else 2, 1
+            player = bytearray(80)
+            player[0], player[5], player[7] = 5, 77, 164
+            add("actor_order_armor", 0x98EC, player=player, memory={0xC800: actors.hex()},
+                initial=actors.hex(), owner=2, expire=expire, timer=timer)
+    for gate in (0, 1, 2, 3):
+        for facing in (0, 1):
+            for x in (0, 6, 8, 14, 16, 20, 226, 228, 244, 252):
+                for y in (0, 2, 38, 49, 50, 52, 96):
+                    player = bytearray(80)
+                    player[5], player[7], player[12] = y, x, facing
+                    delta = -512 if facing else 512
+                    add("phantom_gate", 0x6C73, player=player, memory={0xC5AC: gate, 0xC5AD: 96 if gate else 0, 0xC5AE: 240 if gate else 0},
+                        registers={"BC": delta & 65535}, gate=gate, facing=facing, x=x, y=y, delta=delta)
     return cases
 
 
@@ -287,6 +365,12 @@ def script_for(cases, output, rom, info):
  }
  putregs $regs''')
     script = script.replace("debug set_bp 0x509f {$::active} return_now", "debug set_bp 0x509f {$::active} record_sound")
+    script = script.replace("debug set_bp 0xf0a0 {} returned", '''debug set_bp 0xf0a0 {} returned
+ debug set_bp 0x993b {$::active && [string match "actor_order*" [lindex [lindex $::fixtures $::ci] 5]]} {puts $::output "EVENT\\t$::ci\\t$::si\\tactor_dispatch\\t[expr {([reg IX]-0xc800)/128}]"}
+ debug set_bp 0x99b9 {$::active && [string match "actor_order*" [lindex [lindex $::fixtures $::ci] 5]]} {puts $::output "EVENT\\t$::ci\\t$::si\\tactor_move\\t[expr {([reg IX]-0xc800)/128}]"}''')
+    script = script.replace("debug set_bp 0xf0a0 {} returned", '''debug set_bp 0xf0a0 {} returned
+ debug set_bp 0x4566 {$::active && [string match "water_pending*" [lindex [lindex $::fixtures $::ci] 5]]} return_now
+ debug set_bp 0x5593 {$::active && [lindex [lindex $::fixtures $::ci] 5] eq "water_pending_sequence"} return_now''')
     script = script.replace("proc begin {}", '''proc record_sound {} {
  global output ci si
  puts $output "EVENT\\t$ci\\t$si\\tsound\\t[expr {[reg AF] >> 8}]"
@@ -310,6 +394,8 @@ def extras(path):
                                                     [int(value) for value in fields[15:21]] + [bytes.fromhex(fields[21]), int(fields[22])])
         elif fields[0] == "EVENT" and fields[3] == "sound":
             sounds.setdefault((int(fields[1]), int(fields[2])), []).append(int(fields[4]))
+        elif fields[0] == "EVENT" and fields[3] in ("actor_dispatch", "actor_move"):
+            sounds.setdefault((int(fields[1]), int(fields[2]), fields[3]), []).append(int(fields[4]))
     return states, sounds
 
 
@@ -499,6 +585,79 @@ def verify(cases, baseline, current, enabled):
                 for offset in offsets:
                     expected_player[chosen + offset] = 0
             assert p == expected_player, (group, m, p.hex(), expected_player.hex())
+        elif group == "water_pending":
+            protected = (m["second"] == (1, 0) and m["attack"] != 0 and m["weapon"] >= 2
+                         and m["first"][0] != 1)
+            if "water_pending" in enabled and protected:
+                expected_player = bytearray.fromhex(case["player"])
+                assert row[1][7] == 0x30, (group, m, "spent hearts on a rejected claim")
+            else:
+                assert row[1] == old[1], (group, m, "changed normal claim cost")
+                if not m["second"][1]:
+                    if "water_pending" in enabled and "fall_attack" in enabled:
+                        expected_player[64:80] = bytes(16)
+                        expected_player[65], expected_player[72] = 5, m["direction"]
+                    for offset, fix_id in ((13, "screen_edges"), (14, "axe_wall"), (15, "weapon_owner")):
+                        if fix_id in enabled:
+                            expected_player[64 + offset] = 0
+            assert p == expected_player, (group, m, p.hex(), expected_player.hex())
+            if protected:
+                assert original_player[65] == 5 and old[1][7] == 0x25
+                reproduced.add("water_pending")
+        elif group == "water_pending_sequence":
+            blocked = (m["second_sword"] and m["inventory"] == 8 and m["water_tick"] in (6, 7, 8))
+            for tick in range(12):
+                state = rows[ci, tick * 3 + 2]
+                source_state = base_rows[ci, tick * 3 + 2]
+                if tick < (m["water_tick"] or 12) or not blocked or "water_pending" not in enabled:
+                    assert state[0][:64] == source_state[0][:64], (group, m, tick, "first throw changed")
+                    assert state[0][64:77] == source_state[0][64:77], (group, m, tick, "normal water changed")
+                    assert state[1] == source_state[1], (group, m, tick, "normal heart cost changed")
+                else:
+                    assert state[1][7] == 0x30, (group, m, tick, "rejected water spent hearts")
+                    assert state[0][65] == (0 if tick < 8 else 2), (group, m, tick, "pending sword lost")
+            final, source_final = rows[ci, 35], base_rows[ci, 35]
+            if blocked:
+                assert source_final[1][7] == 0x25
+                assert source_final[0][65] == (2 if m["water_tick"] == 8 else 5)
+            if blocked and "water_pending" in enabled:
+                assert final[0][49] == final[0][65] == 2
+            if not m["second_sword"] and m["inventory"] == 8:
+                assert final[0][65] == 5 and final[1][7] == 0x25
+        elif group.startswith("actor_order"):
+            initial = bytes.fromhex(m["initial"])
+            dispatch = sounds.get((*key, "actor_dispatch"), [])
+            old_dispatch = base_sounds.get((*key, "actor_dispatch"), [])
+            live = [slot for slot in range(7) if initial[slot * 128]]
+            expected = [slot for slot in live if group != "actor_order_water" or not m["clock"] or slot != m["owner"]]
+            if "actor_order" in enabled:
+                assert dispatch == expected, (group, m, dispatch, expected)
+                assert extra[key][6] == 0xCB80, (group, "owner cursor", extra[key][6])
+                for slot in live:
+                    if slot != m["owner"]:
+                        timer_offset = 17 if initial[slot * 128] == 0x10 else 12
+                        assert row[2][slot * 128 + timer_offset] == initial[slot * 128 + timer_offset] - 1, (group, slot, "timer updated twice")
+                if group == "actor_order":
+                    births = [slot for slot in range(7) if row[2][slot * 128] == 0x24]
+                    for slot in births:
+                        record = row[2][slot * 128:(slot + 1) * 128]
+                        assert record[12] == 1, (group, "newborn AI ran immediately")
+                        assert record[2:6] == bytes.fromhex("80500082"), (group, "lost newborn's immediate movement", record[2:6].hex())
+            else:
+                assert row[2] == old[2], (group, "disabled behavior changed")
+                assert dispatch == old_dispatch
+            if len(old_dispatch) != len(set(old_dispatch)):
+                reproduced.add("actor_order")
+            if group == "actor_order_water":
+                assert row[2] == old[2], (group, "natural water/splash behavior changed")
+        elif group == "phantom_gate":
+            expected_x = (m["x"] * 256 + m["delta"]) & 65535 if "phantom_gate" in enabled and m["gate"] == 0 else int.from_bytes(original_player[6:8], "little")
+            assert int.from_bytes(p[6:8], "little") == expected_x, (group, m, p[6:8].hex(), expected_x)
+            if m["gate"]:
+                assert p == original_player, (group, "real gate changed")
+            if m["gate"] == 0 and m["facing"] == 1 and m["x"] == 14 and m["y"] == 38:
+                assert original_player[7] == 14
+                reproduced.add("phantom_gate")
         elif group == "axe_wall":
             final, original_final = rows[ci, 1], base_rows[ci, 1]
             should_break = m["notification"] in (2, 3) and ("axe_wall" not in enabled or m["kind"] == 3 and m["inspected"] == m["actual"])

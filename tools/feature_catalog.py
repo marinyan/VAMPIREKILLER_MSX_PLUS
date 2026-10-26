@@ -27,12 +27,15 @@ from fixes.hurt_clip import FIX as HURT_CLIP
 from fixes.water_edge import FIX as WATER_EDGE
 from fixes.bat_y import FIX as BAT_Y
 from fixes.jumper_land import FIX as JUMPER_LAND
+from fixes.water_pending import FIX as WATER_PENDING
+from fixes.actor_order import FIX as ACTOR_ORDER
+from fixes.phantom_gate import FIX as PHANTOM_GATE
 
 # Add a fix module above and register it here. Order is stable for ROM layout.
 ADDITIONAL_FIXES = (STAIRS, TRAP_CONTACT, TRAP_ATTACK, PATROL_TIMER, MUMMY_START, REFORM_HP, STUN_HP, HOURGLASS,
                     ACTOR_ALLOC, PROJECTILE_ALLOC, EMPTY_PROJECTILE, PROJECTILE_BOX, CROUCH_FALL, PLATFORM_LAND,
                     PLATFORM_TURN, SHOP_INPUT, BOSS_SPAWN, WEAPON_OWNER, AXE_WALL, HURT_CLIP,
-                    WATER_EDGE, BAT_Y, JUMPER_LAND)
+                    WATER_EDGE, BAT_Y, JUMPER_LAND, WATER_PENDING, ACTOR_ORDER, PHANTOM_GATE)
 CATALOG = (FALL_ATTACK, SCREEN_EDGES, SHIELD_FIX, *ADDITIONAL_FIXES)
 
 

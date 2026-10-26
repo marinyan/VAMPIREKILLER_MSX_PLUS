@@ -1,9 +1,10 @@
 {
   "format": "vampire-killer-ips-catalog-v1",
   "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
-  "all_fixes_rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+  "all_fixes_rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
   "bugs": [
     "msx.actor_alloc",
+    "msx.actor_order",
     "msx.axe_wall",
     "msx.bat_y",
     "msx.boss_spawn",
@@ -15,6 +16,7 @@
     "msx.jumper_land",
     "msx.mummy_start",
     "msx.patrol_timer",
+    "msx.phantom_gate",
     "msx.platform_land",
     "msx.platform_turn",
     "msx.projectile_alloc",
@@ -28,6 +30,7 @@
     "msx.trap_attack",
     "msx.trap_contact",
     "msx.water_edge",
+    "msx.water_pending",
     "msx.weapon_owner"
   ],
   "fixes": [
@@ -315,6 +318,39 @@
       "expanded_rom": true,
       "description_ja": "バグ説明\n運搬されて出現したのみ男が、初めて落下する途中で床がないのに着地した扱いになり、空中で高さを丸めて一旦停止し、再び跳び始めます。\n\n発生する場面\n運搬されたのみ男が放たれ、初回の降下中にまだ床へ届いていない場合です。\n\n修正後の動作\n床がなければ重力の更新だけを続け、支持が得られた場合だけ既存の着地処理へ進めます。本当の着地時の丸め・停止・2更新の待機と、その後のジャンプは維持します。",
       "description_en": "Bug description\nOn its first drop, a carried jumper can enter its landing pause without a floor, round its height in midair, and start another jump before reaching the ground.\n\nWhen it happens\nA newly released carried jumper is in its initial descent and has not yet reached a supporting floor.\n\nWith this fix\nContinue gravity updates without landing until support exists. Preserve actual landing alignment, stopping, the two-update pause, and subsequent jumps."
+    },
+    {
+      "id": "water_pending",
+      "title_ja": "聖水と発射待ちの剣が同じ枠を使う",
+      "title_en": "Holy-water and pending-throw overlap",
+      "bug_ids": [
+        "msx.water_pending"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n剣を続けて投げる途中で聖水を使うと、2本目の剣の発射予約へ聖水が入り、剣が聖水に変わったり、出した聖水が剣に上書きされたりします。後者ではハートだけ5個消費します。\n\n発生する場面\n空中で剣を2回続けて投げ、2本目の発射待ちから発射直前までの間に、聖水を使う方向入力を行います。左右両方向が対象です。\n\n修正後の動作\n現在の投擲攻撃が2番目の枠を使う間は、聖水の使用とハート消費を受け付けません。1番目の枠から発射できる場合、攻撃中でない場合、通常の聖水使用は維持します。\n\n補足\n従来の「落下中の武器使用」にも競合防止を含みます。この項目なら、落下中の攻撃制限を変えずに単独で修正できます。両方を選んだ場合は共通の確認を1回だけ行います。",
+      "description_en": "Bug description\nUsing holy water while a second sword is waiting to launch lets both attacks claim the same slot. The sword can become water, or the water can be overwritten by a sword after consuming five hearts.\n\nWhen it happens\nThrow two swords in succession while airborne, then request holy water while the second throw is pending or about to launch. Either direction can trigger it.\n\nWith this fix\nReject holy water and its heart cost while the current projectile attack needs the second slot. Preserve ordinary water use, attacks completing from the first slot, and inactive stale records.\n\nNotes\nThe earlier Weapons during falls item also protects pending throws. This item applies the correction independently while retaining the original falling-attack restriction. Selecting both performs a single shared check."
+    },
+    {
+      "id": "actor_order",
+      "title_ja": "敵の生成で同じ敵が二度動く",
+      "title_en": "Actor scan order after spawning",
+      "bug_ids": [
+        "msx.actor_order"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n敵の消滅演出から小ハートなどを生成すると、空いた別の枠へ処理位置が移り、その位置から敵の走査まで再開します。その結果、生存している敵が同じ更新内で二度動いたり、待ち時間が二度減ったりします。\n\n発生する場面\n後ろの枠で処理中の敵や消滅演出が、前方の空き枠へ新しいものを生成する場面です。後方に生成されたものを、その更新で余分に動かす問題も対象です。\n\n修正後の動作\n元の7枠を順番に一度ずつ調べます。生成直後に元々行われる移動と画面端の処理を残した後で走査位置を戻し、新しく生まれたもののAIは次の更新まで待ちます。生成失敗時の解放処理や時止めとの併用にも対応します。",
+      "description_en": "Bug description\nSpawning a heart or another actor can change the current record pointer and rewind the outer scan. Surviving enemies can then move twice or lose two timer counts in one update.\n\nWhen it happens\nAn actor or death effect processed in a later record allocates an earlier free record. New actors allocated later in the scan also require protection against an extra AI update.\n\nWith this fix\nVisit the seven original records in order once. Keep the existing immediate movement and edge processing on the returned newborn before restoring the scan owner, and defer the newborn's AI until the next update. Preserve allocation-failure cleanup and time-stop handling."
+    },
+    {
+      "id": "phantom_gate",
+      "title_ja": "門のない部屋の左上で引っ掛かる",
+      "title_en": "Phantom gate at the screen origin",
+      "bug_ids": [
+        "msx.phantom_gate"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n門のない部屋では門の座標が0になりますが、移動処理が門の有無を確認しないため、左上に見えない門があるように一時的に止まります。左向きのジャンプなどで発生します。\n\n発生する場面\n門のない部屋の左上へ向かい、X8〜15・Y2〜49付近を左向きに通過する場面です。位置や向きが範囲外になると動けます。\n\n修正後の動作\n門が存在しない場合だけ門への接触確認を省略し、そのまま通常の横移動へ進めます。実在する門の開閉、停止範囲、通過タイミングや通常の壁は変えません。",
+      "description_en": "Bug description\nRooms without a gate leave its coordinates at zero, but movement still tests those coordinates as a real gate. Leftward jumps near the upper-left corner can briefly stick against an invisible boundary.\n\nWhen it happens\nMove left near X8–15 and Y2–49 in a room without a gate. Movement resumes after the position or direction leaves the affected range.\n\nWith this fix\nSkip only the gate collision query when no gate exists, then continue ordinary movement. Preserve actual gates, their open/closed states, blocking bounds, transition timing, and ordinary walls."
     }
   ]
 }

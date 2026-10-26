@@ -33,11 +33,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -48,6 +55,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -59,6 +67,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": []
@@ -94,11 +103,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -109,6 +125,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -120,6 +137,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -157,11 +175,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -172,6 +197,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -183,6 +209,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -220,11 +247,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -235,6 +269,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -246,6 +281,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -283,11 +319,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -298,6 +341,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -309,6 +353,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -346,11 +391,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -361,6 +413,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -372,6 +425,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -409,11 +463,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -424,6 +485,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -435,6 +497,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -472,11 +535,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -487,6 +557,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -498,6 +569,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -535,11 +607,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -550,6 +629,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -561,6 +641,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -598,11 +679,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -613,6 +701,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -624,6 +713,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -661,11 +751,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -676,6 +773,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -687,6 +785,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -724,11 +823,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -739,6 +845,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -750,6 +857,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -787,11 +895,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -802,6 +917,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -813,6 +929,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -850,11 +967,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -865,6 +989,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -876,6 +1001,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -913,11 +1039,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -928,6 +1061,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -939,6 +1073,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -976,11 +1111,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -991,6 +1133,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1002,6 +1145,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1039,11 +1183,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1054,6 +1205,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1065,6 +1217,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1102,11 +1255,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1117,6 +1277,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1128,6 +1289,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1165,11 +1327,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1180,6 +1349,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1191,6 +1361,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1228,11 +1399,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1243,6 +1421,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1254,6 +1433,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1291,11 +1471,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1306,6 +1493,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1317,6 +1505,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1354,11 +1543,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1369,6 +1565,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1380,6 +1577,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1417,11 +1615,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1432,6 +1637,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1443,6 +1649,7 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1480,11 +1687,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1495,6 +1709,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1506,14 +1721,15 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
         "jumper_land"
       ]
     },
-    "all": {
-      "rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+    "water_pending": {
+      "rom_sha256": "7a44858042d4ce238e3c0a93958c6dd4595ba66147aae71300372ebb625024ca",
       "rom_bytes": 262144,
       "cases": {
         "stairs": 1024,
@@ -1543,11 +1759,18 @@
         "hurt_vertical": 1176,
         "water_edge": 600,
         "bat_y": 128,
-        "jumper_land": 40
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
       },
-      "function_returns": 4814,
+      "function_returns": 6612,
       "original_bugs_reproduced": [
         "actor_alloc",
+        "actor_order",
         "axe_wall",
         "bat_y",
         "boss_spawn",
@@ -1558,6 +1781,7 @@
         "jumper_land",
         "mummy_start",
         "patrol_timer",
+        "phantom_gate",
         "platform_land",
         "platform_turn",
         "projectile_alloc",
@@ -1569,6 +1793,223 @@
         "trap_attack",
         "trap_contact",
         "water_edge",
+        "water_pending",
+        "weapon_owner"
+      ],
+      "enabled": [
+        "water_pending"
+      ]
+    },
+    "actor_order": {
+      "rom_sha256": "5620858d98413d5d9a4414e46221f5b08f08ac76eb0234aaa0552ab2beafd8e4",
+      "rom_bytes": 262144,
+      "cases": {
+        "stairs": 1024,
+        "trap": 72,
+        "patrol_timer": 12,
+        "mummy_start": 6,
+        "reform_hp": 12,
+        "stun_hp": 12,
+        "hourglass": 35,
+        "shield_transition": 150,
+        "actor_alloc": 45,
+        "projectile_alloc": 54,
+        "boss_spawn": 45,
+        "projectile_rect": 392,
+        "platform_land": 300,
+        "platform_turn": 24,
+        "crouch_fall": 8,
+        "shop_input": 64,
+        "weapon_owner_pickup": 64,
+        "weapon_owner_lose": 24,
+        "weapon_owner_exit": 24,
+        "weapon_owner_wall": 24,
+        "projectile_claim": 4,
+        "holy_claim": 4,
+        "axe_wall": 30,
+        "hurt_horizontal": 144,
+        "hurt_vertical": 1176,
+        "water_edge": 600,
+        "bat_y": 128,
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
+      },
+      "function_returns": 6612,
+      "original_bugs_reproduced": [
+        "actor_alloc",
+        "actor_order",
+        "axe_wall",
+        "bat_y",
+        "boss_spawn",
+        "crouch_fall",
+        "empty_projectile",
+        "hourglass",
+        "hurt_clip",
+        "jumper_land",
+        "mummy_start",
+        "patrol_timer",
+        "phantom_gate",
+        "platform_land",
+        "platform_turn",
+        "projectile_alloc",
+        "projectile_box",
+        "reform_hp",
+        "shop_input",
+        "stairs",
+        "stun_hp",
+        "trap_attack",
+        "trap_contact",
+        "water_edge",
+        "water_pending",
+        "weapon_owner"
+      ],
+      "enabled": [
+        "actor_order"
+      ]
+    },
+    "phantom_gate": {
+      "rom_sha256": "0810bc72dc301b6be5b16d47f5cbc8b192bb8ae42b42f9ff0de6f5f3cf925b7a",
+      "rom_bytes": 262144,
+      "cases": {
+        "stairs": 1024,
+        "trap": 72,
+        "patrol_timer": 12,
+        "mummy_start": 6,
+        "reform_hp": 12,
+        "stun_hp": 12,
+        "hourglass": 35,
+        "shield_transition": 150,
+        "actor_alloc": 45,
+        "projectile_alloc": 54,
+        "boss_spawn": 45,
+        "projectile_rect": 392,
+        "platform_land": 300,
+        "platform_turn": 24,
+        "crouch_fall": 8,
+        "shop_input": 64,
+        "weapon_owner_pickup": 64,
+        "weapon_owner_lose": 24,
+        "weapon_owner_exit": 24,
+        "weapon_owner_wall": 24,
+        "projectile_claim": 4,
+        "holy_claim": 4,
+        "axe_wall": 30,
+        "hurt_horizontal": 144,
+        "hurt_vertical": 1176,
+        "water_edge": 600,
+        "bat_y": 128,
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
+      },
+      "function_returns": 6612,
+      "original_bugs_reproduced": [
+        "actor_alloc",
+        "actor_order",
+        "axe_wall",
+        "bat_y",
+        "boss_spawn",
+        "crouch_fall",
+        "empty_projectile",
+        "hourglass",
+        "hurt_clip",
+        "jumper_land",
+        "mummy_start",
+        "patrol_timer",
+        "phantom_gate",
+        "platform_land",
+        "platform_turn",
+        "projectile_alloc",
+        "projectile_box",
+        "reform_hp",
+        "shop_input",
+        "stairs",
+        "stun_hp",
+        "trap_attack",
+        "trap_contact",
+        "water_edge",
+        "water_pending",
+        "weapon_owner"
+      ],
+      "enabled": [
+        "phantom_gate"
+      ]
+    },
+    "all": {
+      "rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
+      "rom_bytes": 262144,
+      "cases": {
+        "stairs": 1024,
+        "trap": 72,
+        "patrol_timer": 12,
+        "mummy_start": 6,
+        "reform_hp": 12,
+        "stun_hp": 12,
+        "hourglass": 35,
+        "shield_transition": 150,
+        "actor_alloc": 45,
+        "projectile_alloc": 54,
+        "boss_spawn": 45,
+        "projectile_rect": 392,
+        "platform_land": 300,
+        "platform_turn": 24,
+        "crouch_fall": 8,
+        "shop_input": 64,
+        "weapon_owner_pickup": 64,
+        "weapon_owner_lose": 24,
+        "weapon_owner_exit": 24,
+        "weapon_owner_wall": 24,
+        "projectile_claim": 4,
+        "holy_claim": 4,
+        "axe_wall": 30,
+        "hurt_horizontal": 144,
+        "hurt_vertical": 1176,
+        "water_edge": 600,
+        "bat_y": 128,
+        "jumper_land": 40,
+        "water_pending": 600,
+        "water_pending_sequence": 12,
+        "actor_order": 196,
+        "actor_order_water": 6,
+        "actor_order_armor": 4,
+        "phantom_gate": 560
+      },
+      "function_returns": 6612,
+      "original_bugs_reproduced": [
+        "actor_alloc",
+        "actor_order",
+        "axe_wall",
+        "bat_y",
+        "boss_spawn",
+        "crouch_fall",
+        "empty_projectile",
+        "hourglass",
+        "hurt_clip",
+        "jumper_land",
+        "mummy_start",
+        "patrol_timer",
+        "phantom_gate",
+        "platform_land",
+        "platform_turn",
+        "projectile_alloc",
+        "projectile_box",
+        "reform_hp",
+        "shop_input",
+        "stairs",
+        "stun_hp",
+        "trap_attack",
+        "trap_contact",
+        "water_edge",
+        "water_pending",
         "weapon_owner"
       ],
       "enabled": [
@@ -1597,12 +2038,16 @@
         "hurt_clip",
         "water_edge",
         "bat_y",
-        "jumper_land"
+        "jumper_land",
+        "water_pending",
+        "actor_order",
+        "phantom_gate"
       ]
     }
   },
   "covered_bug_ids": [
     "msx.actor_alloc",
+    "msx.actor_order",
     "msx.axe_wall",
     "msx.bat_y",
     "msx.boss_spawn",
@@ -1614,6 +2059,7 @@
     "msx.jumper_land",
     "msx.mummy_start",
     "msx.patrol_timer",
+    "msx.phantom_gate",
     "msx.platform_land",
     "msx.platform_turn",
     "msx.projectile_alloc",
@@ -1627,6 +2073,7 @@
     "msx.trap_attack",
     "msx.trap_contact",
     "msx.water_edge",
+    "msx.water_pending",
     "msx.weapon_owner"
   ],
   "original_asset_banks_unchanged": true
