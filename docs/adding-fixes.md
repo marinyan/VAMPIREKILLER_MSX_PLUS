@@ -18,14 +18,16 @@
 ## 新しい項目を登録する
 
 1. `tools/fixes/` にモジュールを作ります。`shield_fix.py` は短い実例です。
-2. 安定したID（小文字の英数字とアンダースコア、先頭は英字）と日英の名前・説明を `Fix` に記述します。
+2. 安定したID（小文字の英数字とアンダースコア、先頭は英字）と日英の名前・要約・バグ説明を `Fix` に記述します。
 3. `tools/feature_catalog.py` で `FIX` をインポートし、`CATALOG` へ追加します。既存の登録順は維持します。CLIと画面への個別追加は不要です。
 4. 単体と関連項目の診断を追加し、容量・競合と実際のゲーム動作を確認します。
+
+項目数は固定しません。新しい修正が増えても既存のIDは維持してください。保存した選択JSONはIDを参照するため、項目の表示順や説明が変わっても同じ修正を指定できます。新しい項目が追加されても、以前保存した選択へ自動的に追加はしません。
 
 モジュールの形は次のとおりです。コメントの箇所には、原ROMで確認した追加コードと変更を実装します。
 
 ```python
-from fixes import Fix
+from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
@@ -45,12 +47,20 @@ FIX = Fix(
     id="your_fix",
     title_ja="修正名", title_en="Fix title",
     description_ja="挙動の説明", description_en="Behavior description",
+    explanation=Explanation(
+        symptom_ja="何が起きてプレイにどう影響するか", symptom_en="The symptom and its effect on play",
+        trigger_ja="どの場面・操作・装備で発生するか", trigger_en="The situation, inputs, or equipment that trigger it",
+        correction_ja="有効にするとどう変わるか", correction_en="How enabling this fix changes the behavior",
+        notes_ja="対象や維持する動作など", notes_en="Scope and behavior that stays the same",
+    ),
     emit_helpers=emit_helpers, apply=apply,
     requires=(), conflicts=(),
 )
 ```
 
 追加コードが不要な修正は `emit_helpers` を省略できます。追加コードを持たない項目だけを選んでも、長さ0のRAM転送は生成しません。ラベルは他の項目と重複しない名前を使います。
+
+`description_ja/en` は一覧の短い要約です。`Explanation` にはバグの現象、発生条件、修正後の動作を省略せず書き、必要なら補足を加えます。複数のバグをまとめた項目では、それぞれを分けて説明します。全文はマウスオーバーのtips、「詳細」、CLIの `--list` に共通で表示します。単なる挙動改善なら `behavior_change=True` を指定し、バグ修正として誤表示しないようにします。登録項目に日英の説明が揃っていることも `verify_selector.py` で確認します。
 
 `edit` のアドレスはROMファイル先頭からのオフセットです。元バイトと置換バイトは同じ長さにし、`bytes` または16進文字列で渡します。`hook` は原則3バイトのCALLを作り、JPなら最後の引数を `0xC3` にします。呼び出し先ラベルのアドレスは統合後に解決されます。
 

@@ -26,6 +26,8 @@ python tools/patch_selector.py --lang en
 
 On Windows, you can also double-click [select_patches.pyw](select_patches.pyw). Choose an unmodified source ROM, check the desired fixes, then click **Generate IPS** and choose a destination. All processing stays on your computer; the source ROM is neither uploaded nor modified. Selections can be saved and loaded as JSON. The list scrolls as more fixes are added.
 
+Hover over an item's name or summary to see **the bug description, when it happens, the corrected behavior, and notes**. Long tips can be scrolled. Click **Details**, or focus a checkbox and press F1, to open the full explanation in a separate scrollable window. The two shield bugs are explained individually; the screen-edge option is identified as a behavior change. Explanations follow the Japanese/English language selection.
+
 The command-line interface generates only the selection you request:
 
 ```powershell

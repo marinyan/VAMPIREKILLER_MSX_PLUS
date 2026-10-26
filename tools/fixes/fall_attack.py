@@ -1,7 +1,7 @@
 """Weapons during falls: resident helpers and original-ROM hooks."""
 import struct
 
-from fixes import Fix
+from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
@@ -46,4 +46,21 @@ FIX = Fix(
     description_ja='足場から落下している間も、鞭と特殊武器を使用できます。',
     description_en='Use the whip and special weapons while falling off a ledge.',
     emit_helpers=emit_helpers, apply=apply,
+    explanation=Explanation(
+        symptom_ja=("足場から歩いて落ちると、地上で始めた鞭などの攻撃が着地するまで途中で止まります。"
+                    "また、落下中に特殊武器を使おうとしても受け付けられません。ジャンプ中にはできる攻撃が、"
+                    "歩いて落ちた場合には続かないという違いがあります。"),
+        symptom_en=("When you walk off a ledge, an attack started on the ground stops progressing until you land. "
+                    "Special-weapon input is also rejected during that fall. Attacks that work during a jump "
+                    "therefore stop or become unavailable when you fall by walking off an edge."),
+        trigger_ja="足場の端から歩いて落ちる前後に攻撃する、またはその落下中に特殊武器を使う操作をします。",
+        trigger_en="Attack just before walking off a ledge, or try to use a special weapon during the resulting fall.",
+        correction_ja=("歩いて落ちている間も攻撃の動きと表示が進み、鞭・剣・斧・十字架・聖水・砂時計を使えます。"
+                       "発射待ちの剣があるときに、聖水がその枠を上書きすることも防ぎます。"),
+        correction_en=("Attacks continue progressing and displaying during the fall, and the whip, sword, axe, cross, "
+                       "holy water, and stopwatch remain usable. Holy water also cannot overwrite a sword slot "
+                       "that is still waiting to launch."),
+        notes_ja="落下速度、着地の判定と音は変えません。被弾中や死亡中の攻撃制限も維持します。",
+        notes_en="Falling speed, landing detection and sound, and the attack restrictions during injury or death are preserved.",
+    ),
 )

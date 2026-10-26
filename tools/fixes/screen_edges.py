@@ -1,7 +1,7 @@
 """Screen-edge behavior: resident helpers and original-ROM hooks."""
 import struct
 
-from fixes import Fix
+from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
@@ -257,4 +257,30 @@ FIX = Fix(
     description_ja='敵の端出現と、小ハート・剣・直進する敵弾の端消失を改善します。',
     description_en='Improve enemy entry and the edges for small hearts, swords, and straight-moving enemy projectiles.',
     emit_helpers=emit_helpers, apply=apply,
+    behavior_change=True,
+    explanation=Explanation(
+        symptom_ja=("周期的に現れるゾンビやコウモリなどが、画面の端より内側に突然現れます。"
+                    "小ハートは左右へ揺れて画面端へ達すると、その判定だけで消えることがあります。"
+                    "剣と一部の直進する敵弾も、絵がまだ画面内に残っている段階で消えます。"
+                    "この項目は、これらの出現と消失を画面端で自然に見せるための挙動改善です。"),
+        symptom_en=("Periodically spawned zombies, bats, and similar enemies can appear suddenly inside the screen. "
+                    "A small heart can disappear just because its horizontal sway reaches an edge. Swords and some "
+                    "straight-moving enemy projectiles also disappear while part of their image is still visible. "
+                    "This option changes those entry and exit behaviors at the screen edges."),
+        trigger_ja=("周期出現する敵を待つ、小ハートが画面端へ揺れるまで待つ、"
+                    "または剣・対象の敵弾が左右端へ進む場面で見られます。"),
+        trigger_en=("Wait for a periodic enemy spawn, let a small heart sway to an edge, or let a sword or an affected "
+                    "enemy projectile travel off either side of the screen."),
+        correction_ja=("対象の敵は左右端から一部ずつ姿を現します。ゾンビの出現先に床がない場合は元の位置を使います。"
+                       "小ハートは横方向を画面内へ収め、画面端だけを理由に消えません。剣と対象の敵弾は絵が全部"
+                       "画面外へ出るまで表示し、反対側へ出現したり当たったりしないようにします。"),
+        correction_en=("Affected enemies enter gradually from the edges. Zombies keep their original spawn position if "
+                       "the edge has no floor. Small hearts stay within the horizontal bounds instead of disappearing "
+                       "at an edge. Swords and affected projectiles remain visible until the whole image is outside "
+                       "and cannot wrap around to appear or collide on the opposite side."),
+        notes_ja=("斧と十字架が端で反転して戻る動きは維持します。すべての敵や敵弾を一括変更するものではありません。"
+                  "敵の出現間隔、小ハートの揺れ・取得効果・着地後の寿命も変えません。"),
+        notes_en=("Axes and crosses still turn back at the edges. This does not change every enemy or projectile. "
+                  "Spawn timing and small hearts' sway, pickup effects, and lifetime after landing are preserved."),
+    ),
 )

@@ -18,14 +18,16 @@ The selector links the requested fixes and generates one IPS from the original R
 ## Register an item
 
 1. Create a module in `tools/fixes/`. `shield_fix.py` is a short working example.
-2. Define a `Fix` with a stable ID, Japanese/English titles and descriptions. IDs use lowercase letters, digits, and underscores, beginning with a letter.
+2. Define a `Fix` with a stable ID, Japanese/English titles, summaries, and bug explanations. IDs use lowercase letters, digits, and underscores, beginning with a letter.
 3. Import its `FIX` in `tools/feature_catalog.py` and append it to `CATALOG`, retaining the existing order. The CLI and GUI discover the entry automatically.
 4. Add behavioral checks for the fix and relevant interactions; check placement and actual game behavior.
+
+The number of items is not fixed. Keep existing IDs stable as new fixes are added. Saved selections refer to IDs, so changes to display order or explanations do not change the selected fixes. New items are not automatically added to previously saved selections.
 
 A module has the following shape. Replace the comments with helpers and edits verified against the original ROM.
 
 ```python
-from fixes import Fix
+from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
@@ -45,12 +47,20 @@ FIX = Fix(
     id="your_fix",
     title_ja="修正名", title_en="Fix title",
     description_ja="挙動の説明", description_en="Behavior description",
+    explanation=Explanation(
+        symptom_ja="何が起きてプレイにどう影響するか", symptom_en="The symptom and its effect on play",
+        trigger_ja="どの場面・操作・装備で発生するか", trigger_en="The situation, inputs, or equipment that trigger it",
+        correction_ja="有効にするとどう変わるか", correction_en="How enabling this fix changes the behavior",
+        notes_ja="対象や維持する動作など", notes_en="Scope and behavior that stays the same",
+    ),
     emit_helpers=emit_helpers, apply=apply,
     requires=(), conflicts=(),
 )
 ```
 
 Omit `emit_helpers` if the fix only edits existing instructions. Builds containing only inline fixes do not emit zero-length RAM transfers. Use labels that do not collide with other modules.
+
+`description_ja/en` supplies the brief list summary. `Explanation` must describe the symptom, its trigger, and the corrected behavior in both languages, with optional notes. Explain individual bugs separately when an item groups several fixes. Hover tips, Details, and CLI `--list` all use this full text. Set `behavior_change=True` for a behavior improvement that should not be labeled as a bug fix. `verify_selector.py` checks that registered items have complete explanations in both languages.
 
 `edit` takes a file offset, equal-length original/replacement bytes, and a reason. Byte arguments accept `bytes` or hexadecimal strings. `hook` normally emits a three-byte CALL; pass `0xC3` as its final argument for JP. Label addresses are resolved after linking.
 

@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "tests": 19,
+  "tests": 22,
   "gui_tested": true,
   "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
   "registered_fixes": [

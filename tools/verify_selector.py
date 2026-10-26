@@ -71,6 +71,15 @@ class SelectorChecks(unittest.TestCase):
             result = self.cli("--list", "--lang", language)
             for fix in CATALOG:
                 self.assertIn(fix.title(language), result.stdout)
+                self.assertIn(fix.explanation_text(language), result.stdout)
+
+    def test_registered_fixes_have_complete_bug_explanations(self):
+        for fix in CATALOG:
+            self.assertIsNotNone(fix.explanation, fix.id)
+            for language in ("ja", "en"):
+                for section in ("symptom", "trigger", "correction"):
+                    self.assertTrue(getattr(fix.explanation, f"{section}_{language}").strip(), (fix.id, section, language))
+                self.assertGreater(len(fix.explanation_text(language)), len(fix.description(language)))
 
     def test_cli_invalid_inputs_do_not_write(self):
         wrong = self.folder / "wrong.rom"
@@ -262,6 +271,37 @@ class WindowChecks(SelectorChecks):
             window.canvas.yview_moveto(1)
             self.assertGreater(window.canvas.yview()[0], 0)
 
+    def test_window_hover_tip_and_cleanup(self):
+        fix = CATALOG[0]
+        checkbox = self.window.labels[fix.id][0]
+        helper = self.window.help
+        self.assertTrue(checkbox.bind("<Enter>"))
+        helper.schedule(checkbox, lambda: fix.explanation_text("ja"))
+        token = helper.pending
+        self.assertTrue(self.root.tk.call("after", "info", token))
+        helper.show_tip(checkbox, fix.explanation_text("ja"))
+        self.assertIsNone(helper.pending)
+        self.assertEqual(helper.tip_text.get("1.0", "end-1c"), fix.explanation_text("ja"))
+        self.assertEqual(str(helper.tip_text.cget("state")), "disabled")
+        tip = helper.tip
+        helper.hide()
+        self.assertFalse(tip.winfo_exists())
+        self.assertIsNone(helper.tip)
+
+    def test_window_details_full_text_and_language_change(self):
+        before = self.window.selected_ids()
+        self.window.detail_buttons["shield_fix"].invoke()
+        helper = self.window.help
+        self.assertEqual(before, self.window.selected_ids())
+        self.assertEqual(helper.detail_text.get("1.0", "end-1c"), CATALOG[2].explanation_text("ja"))
+        self.assertEqual(str(helper.detail_text.cget("state")), "disabled")
+        self.window.lang_choice.set("English")
+        self.window.change_language()
+        self.assertEqual(helper.detail_text.get("1.0", "end-1c"), CATALOG[2].explanation_text("en"))
+        self.assertEqual(helper.detail_close.cget("text"), "Close")
+        helper.detail_close.invoke()
+        self.assertFalse(helper.detail_window.winfo_exists())
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -279,7 +319,8 @@ def main():
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(SelectorChecks)
     if not args.skip_gui:
         for name in ("test_window_selection_and_both_languages", "test_window_generate_save_reload_and_invalid_rom",
-                     "test_window_layout_and_long_catalog_scroll"):
+                     "test_window_layout_and_long_catalog_scroll", "test_window_hover_tip_and_cleanup",
+                     "test_window_details_full_text_and_language_change"):
             suite.addTest(WindowChecks(name))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     report = dict(status="passed" if result.wasSuccessful() else "failed", tests=result.testsRun,

@@ -1,5 +1,5 @@
 """Shield durability: resident helpers and original-ROM hooks."""
-from fixes import Fix
+from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
@@ -30,4 +30,29 @@ FIX = Fix(
     description_ja='通常のステージ移動で耐久を持ち越し、ボス後の解除と耐久切れを正常に処理します。',
     description_en='Keep durability across ordinary area changes; correct exhaustion and preserve equipment removal after bosses.',
     emit_helpers=emit_helpers, apply=apply,
+    explanation=Explanation(
+        symptom_ja=("この項目は盾に関する2つの不具合をまとめて直します。\n"
+                    "① 盾を持ったまま通常のステージを移動すると、装備は残るのに残り耐久だけが0になります。"
+                    "そのまま防御すると0から255へ戻り、本来より長く使えてしまいます。\n"
+                    "② 弾を防ぐ盾が最後の耐久を使い切っても、同じ処理で重なった残りの弾まで防ごうとし、"
+                    "耐久が再び0から255へ戻ることがあります。"),
+        symptom_en=("This item fixes two shield bugs.\n"
+                    "1. An ordinary area transition leaves the shield equipped but resets its remaining durability to zero. "
+                    "The next block wraps zero to 255, allowing far more uses than intended.\n"
+                    "2. When a projectile-blocking shield uses its last charge, it can continue blocking other projectiles "
+                    "in the same update and wrap durability from zero to 255 again."),
+        trigger_ja=("盾を装備して白い鍵で通常のステージを移動し、その後に防御します。"
+                    "もう一方は、弾を防ぐ盾の残り耐久が1のときに複数の弾が同時に重なると発生します。"),
+        trigger_en=("Carry a shield through a white-key area transition and then block an attack. "
+                    "The second bug occurs when multiple projectiles overlap a projectile shield with one charge left."),
+        correction_ja=("通常のステージ移動では残り耐久をそのまま持ち越します。最後の1回を使った盾は解除し、"
+                       "その盾で同時に重なった残りの弾まで防ぎません。耐久0の盾による0→255の巻き戻りも防ぎます。"),
+        correction_en=("Ordinary area changes retain the remaining charges. A shield is removed after its final use, "
+                       "and it does not block the remaining projectiles in that update. An exhausted shield cannot "
+                       "wrap zero durability to 255."),
+        notes_ja=("接触ダメージを減らす盾と、弾を防ぐ盾の両方が対象です。取得時は16回分です。"
+                  "ボス撃破後やミス後には、通常どおり盾を外し、耐久も0にします。"),
+        notes_en=("Both the contact-damage reduction shield and projectile-blocking shield are covered. "
+                  "A new shield has 16 charges. Boss clears and lost lives still remove the equipment and clear durability."),
+    ),
 )

@@ -29,7 +29,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.list:
         for fix in CATALOG:
-            print(f"{fix.id}: {fix.title(args.lang)}\n  {fix.description(args.lang)}")
+            print(f"{fix.id}: {fix.title(args.lang)}\n{fix.explanation_text(args.lang)}\n")
             if fix.requires:
                 print("  requires: " + ", ".join(fix.requires))
             if fix.conflicts:
