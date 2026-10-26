@@ -15,6 +15,10 @@ def main():
     compact = json.loads(compact_path.read_text(encoding="utf-8"))
     shield_path = ROOT / "build/shield-verification/report.json"
     shield = json.loads(shield_path.read_text(encoding="utf-8"))
+    selector_path = ROOT / "build/selector-verification/report.json"
+    selector = json.loads(selector_path.read_text(encoding="utf-8"))
+    if selector["status"] != "passed" or not selector["gui_tested"]:
+        raise ValueError("Selector CLI and GUI verification is required")
     if shield["status"] != "passed" or not shield["original_zero_to_255_bug_reproduced"]:
         raise ValueError("Shield regression verification is required")
     for name, data in manifest["variants"].items():
@@ -24,9 +28,12 @@ def main():
             raise ValueError(f"Compact verification is for a different ROM: {name}")
         if data["rom_sha256"] != shield["rom_sha256"][name]:
             raise ValueError(f"Shield verification is for a different ROM: {name}")
+        if data["rom_sha256"] != selector["matches_published_patches"][name]:
+            raise ValueError(f"Selector verification is for a different ROM: {name}")
     (ROOT / "dist/verification.json").write_bytes(report_path.read_bytes())
     (ROOT / "dist/compact-verification.json").write_bytes(compact_path.read_bytes())
     (ROOT / "dist/shield-verification.json").write_bytes(shield_path.read_bytes())
+    (ROOT / "dist/selector-verification.json").write_bytes(selector_path.read_bytes())
     campaign_path = ROOT / "dist/campaign-verification.json"
     campaign_inputs = ROOT / "dist/campaign-inputs.json.gz"
     campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
@@ -36,10 +43,13 @@ def main():
         raise ValueError("Campaign verification is for a different ROM")
     if hashlib.sha256(campaign_inputs.read_bytes()).hexdigest() != campaign["input_archive_sha256"]:
         raise ValueError("Campaign input archive does not match verification")
-    files = [ROOT / "README.md", ROOT / "README.en.md", *sorted((ROOT / "tools").glob("*.py")),
+    files = [ROOT / "README.md", ROOT / "README.en.md", ROOT / "select_patches.pyw",
+             *sorted((ROOT / "tools").rglob("*.py")), *sorted((ROOT / "docs").glob("*.md")),
+             *sorted((ROOT / "examples").glob("*.json")),
              *sorted((ROOT / "dist").glob("*.ips")), ROOT / "dist/manifest.json", ROOT / "dist/verification.json",
              ROOT / "dist/compact-verification.json",
              ROOT / "dist/shield-verification.json",
+             ROOT / "dist/selector-verification.json",
              campaign_path, campaign_inputs,
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_patches.zip"

@@ -10,6 +10,39 @@ The displayed title changes according to the machine's BIOS region. Identify the
 
 [Download the patches, source code, and verification records as a ZIP](dist/VAMPIREKILLER_MSX_PLUS_patches.zip)
 
+## Generate an IPS with selected fixes
+
+**Choose the fixes you want and generate one IPS.** The initial selection contains three items:
+
+- `fall_attack`: weapons during falls
+- `screen_edges`: screen-edge behavior for enemies, small hearts, swords, and straight-moving enemy projectiles
+- `shield_fix`: shield durability across areas, equipment removal, and exhaustion
+
+Extract the ZIP and use Python 3.10 or later. The window requires Tcl/Tk, which is available with the standard Windows Python installer. No extra packages are needed.
+
+```powershell
+python tools/patch_selector.py --lang en
+```
+
+On Windows, you can also double-click [select_patches.pyw](select_patches.pyw). Choose an unmodified source ROM, check the desired fixes, then click **Generate IPS** and choose a destination. All processing stays on your computer; the source ROM is neither uploaded nor modified. Selections can be saved and loaded as JSON. The list scrolls as more fixes are added.
+
+The command-line interface generates only the selection you request:
+
+```powershell
+python tools/patch_selector.py --list --lang en
+python tools/patch_selector.py path/to/original.rom --enable fall_attack shield_fix --out build/my-fixes.ips --save-config build/my-selection.json
+python tools/patch_selector.py path/to/original.rom --config build/my-selection.json --out build/rebuilt.ips
+python tools/patch_selector.py path/to/original.rom --all --out build/all-fixes.ips
+```
+
+Output consists of the IPS and a `name.ips.json` build record containing the selected fixes and SHA-256 hashes of the source ROM, patched ROM, and IPS. It does not write a patched ROM. The JSON created by `--save-config` is a reusable selection; `name.ips.json` is the build record. Replacing existing files requires confirmation in the window or `--force` in the CLI. Unsupported ROMs, empty selections, unknown IDs, dependency cycles, conflicts, and ROM or reserved-RAM overflows are rejected.
+
+Future fixes are added as individual modules, without creating files for every combination. See [Adding fixes](docs/adding-fixes.en.md). The [selector verification record](dist/selector-verification.json) covers byte-for-byte agreement with all seven existing patches, GUI/CLI generation, saved selections, and dependency, conflict, and capacity checks.
+
+## Ready-made IPS files
+
+The seven existing files remain available. Future fixes will be added to the selector catalog.
+
 | Patch | Falling attacks | Screen edges | Shield fix |
 |---|:---:|:---:|:---:|
 | [fall_attack.ips](dist/fall_attack.ips) | ✓ | — | — |
@@ -33,7 +66,7 @@ This is an unedited openMSX screenshot of `combined.ips` in use. The game was dr
 ## Applying a patch
 
 1. Check the size and SHA-256 of your unmodified ROM.
-2. Apply **one** of the seven IPS files to a copy of that ROM. Select the combination you want instead of stacking patches.
+2. Apply **one** generated IPS or one of the seven ready-made IPS files to a copy of that ROM. Do not stack patches.
 3. The result is still 128 KiB. If your emulator requires a mapper selection, choose **Konami without SCC**. When replacing an earlier expanded release, apply the new patch to a fresh copy of the unmodified source ROM.
 
 The supported unmodified source ROM is 128 KiB (131,072 bytes) with this SHA-256:
@@ -70,14 +103,17 @@ For the 1 Mbit asset repack, positions, patterns, and colors for all 168 poses w
 
 ## Building and repeating the checks
 
-Patch generation requires only Python 3 and its standard library.
+Patch generation requires only Python 3.10 or later and its standard library. The selector above generates one requested selection; the following command rebuilds the seven existing releases.
 
 ```powershell
 python tools/build_patches.py path/to/original.rom
 python tools/verify_patch_files.py path/to/original.rom
+python tools/verify_selector.py path/to/original.rom
 ```
 
 The builder writes IPS files and a hash manifest to `dist/`, and patched ROMs and code listings to `build/`. It stops if the source ROM hash does not match.
+
+Selector verification exercises the CLI and Tcl/Tk callbacks. On a system without Tcl/Tk or a display, add `--skip-gui` to `verify_selector.py`; the report records that GUI checks were skipped.
 
 To repeat the emulator diagnostics, provide a portable openMSX installation:
 
@@ -103,6 +139,6 @@ python tools/capture_edge_screenshot.py --rom build/combined.rom --openmsx path/
 
 Images are saved to `build/screenshot/`. The image shown above is `zombie-left-01.png`.
 
-The hooks are implemented in [tools/patches.py](tools/patches.py), and asset compression and deduplication in [tools/compact_assets.py](tools/compact_assets.py). Added code fits inside bank 6 of the original ROM and is loaded at startup into RAM ranges `$E618–E7FF` and `$F100–F1C8`. The three-feature variant uses 683 bytes of added code and leaves 113 bytes free in the repacked ROM area. It does not add bank switching to the ordinary update loop.
+Individual fixes live in [tools/fixes/](tools/fixes/), their registry in [tools/feature_catalog.py](tools/feature_catalog.py), linking and placement in [tools/patches.py](tools/patches.py), and asset compression and deduplication in [tools/compact_assets.py](tools/compact_assets.py). Added code fits inside bank 6 of the original ROM and is loaded at startup into RAM ranges `$E618–E7FF` and `$F100–F1C8`. The three-feature variant uses 683 bytes of added code and leaves 113 bytes free in the repacked ROM area. It does not add bank switching to the ordinary update loop.
 
 RAM placement was chosen after checking the original stack, variables, and image buffers, together with the [cartridge work-area description in the MSX2 Technical Handbook](https://konamiman.github.io/MSX2-Technical-Handbook/md/Chapter5b.html).

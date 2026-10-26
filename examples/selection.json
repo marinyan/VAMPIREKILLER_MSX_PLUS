@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "fixes": [
+    "fall_attack",
+    "screen_edges",
+    "shield_fix"
+  ]
+}

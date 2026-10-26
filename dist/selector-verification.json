@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "tests": 19,
+  "gui_tested": true,
+  "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+  "registered_fixes": [
+    "fall_attack",
+    "screen_edges",
+    "shield_fix"
+  ],
+  "matches_published_patches": {
+    "fall_attack": "e67184071705b7862c10bf4ec1773ef2c80ad3e4b9d88eaa8c8fb8864fbd7734",
+    "screen_edges": "0085d22ad5c6377d494ec9a025bb938e548fbec5a3bb74aa55939902365b3917",
+    "combined": "b63e21aa3bcf6c21b9f114ed0e04c7e2c7ae567d64c18622851142271c30d0f1",
+    "shield_fix": "61b938a63b4bb60bbba26dc5652b82e5726f6a855c219fe23ebf3e75e57a91c1",
+    "fall_attack_shield": "bb3bcbf4aaa3fd6190bd935f9b7f16c92400bd850a7b70fb09c7b0cdc3eb70ce",
+    "screen_edges_shield": "f82aa5858b0716da739b3fed4f0ca03232e9d79b8076b8e58e36279677ce09c0",
+    "combined_shield": "7f3f1b540bed27dca43ba1191973bec060716d5e52c7bf52dce3270a6a297dd2"
+  },
+  "synthetic_inline_extension_fixes": 20
+}

@@ -10,6 +10,39 @@ MSX2用『悪魔城ドラキュラ／Vampire Killer』の操作と画面端処�
 
 [パッチ・ソース・検証記録一式をZIPでダウンロード](dist/VAMPIREKILLER_MSX_PLUS_patches.zip)
 
+## 修正を選んでIPSを生成
+
+**今後は、使いたい修正を選んでIPSを1枚生成できます。** 以下の3項目を選択できます。
+
+- `fall_attack`：落下中の武器使用
+- `screen_edges`：敵・小ハート・剣・直進する敵弾の画面端処理
+- `shield_fix`：盾の耐久持ち越し・装備解除・耐久切れの修正
+
+ZIPを展開し、Python 3.10以降（画面版はTcl/Tkを含む）で起動してください。追加のパッケージは不要です。
+
+```powershell
+python tools/patch_selector.py --lang ja
+```
+
+Windowsでは [select_patches.pyw](select_patches.pyw) のダブルクリックでも起動できます。無改変の原ROMを指定し、チェックボックスで修正を選び、「IPSを生成」を押して保存先を選びます。ROMはこのPC内で読み取り、外部への送信や書き換えはしません。選択内容はJSONで保存・読込できます。項目が増えた場合は一覧をスクロールできます。
+
+コマンドラインでも、必要な組み合わせだけを生成できます。
+
+```powershell
+python tools/patch_selector.py --list --lang ja
+python tools/patch_selector.py path/to/original.rom --enable fall_attack shield_fix --out build/my-fixes.ips --save-config build/my-selection.json
+python tools/patch_selector.py path/to/original.rom --config build/my-selection.json --out build/rebuilt.ips
+python tools/patch_selector.py path/to/original.rom --all --out build/all-fixes.ips
+```
+
+生成物はIPSと、選択項目・元ROM／適用後ROM／IPSのSHA-256などを記した `名前.ips.json` です。適用済みROMは出力しません。`--save-config` のJSONは再生成用で、`名前.ips.json` は生成記録です。既存ファイルの置換には画面の確認、またはCLIの `--force` が必要です。誤ったROM、空の選択、不明な項目、依存関係の循環、競合、ROM／予約RAMの容量不足はエラーになります。
+
+新しい修正は項目別のモジュールとして追加します。組み合わせ別ファイルを増やす必要はありません。[修正の追加手順](docs/adding-fixes.md)を参照してください。既存7種類すべてとの出力一致、画面とCLIの生成・保存・再読込、依存・競合・容量の診断を[選択ツールの検証記録](dist/selector-verification.json)にまとめています。
+
+## 生成済みIPS
+
+既存の7種類も引き続き利用できます。今後の修正は選択ツールの項目として追加します。
+
 | パッチ | 落下攻撃 | 画面端 | 盾耐久 |
 |---|:---:|:---:|:---:|
 | [fall_attack.ips](dist/fall_attack.ips) | ✓ | — | — |
@@ -33,7 +66,7 @@ MSX2用『悪魔城ドラキュラ／Vampire Killer』の操作と画面端処�
 ## 適用方法
 
 1. 手元の無改変ROMのサイズとSHA-256を確認してください。
-2. 7つのうち**どれか1つ**のIPSを、無改変ROMのコピーへ適用してください。複数機能を使う場合も、パッチを重ねず対応する組み合わせを選びます。
+2. 選択ツールで生成したIPS、または生成済み7種類のうち**どれか1つ**を、無改変ROMのコピーへ適用してください。複数機能を使う場合も、IPSは重ねません。
 3. 適用後のROMは元と同じ128 KiBです。エミュレーターでマッパーの指定が必要な場合は **Konami／SCCなし** を選んでください。従来の拡張版を使っていた場合も、無改変の原ROMへあらためて適用してください。
 
 対応する無改変ROMは128 KiB（131,072バイト）で、SHA-256が次のものです。
@@ -72,14 +105,17 @@ JP は検証時の本体設定を示しています。
 
 ## ビルドと再検証
 
-Python 3の標準ライブラリーだけでパッチを生成できます。
+Python 3.10以降の標準ライブラリーだけでパッチを生成できます。上の選択ツールは任意の選択を1枚生成し、下のコマンドは既存7種類をまとめて再生成します。
 
 ```powershell
 python tools/build_patches.py path/to/original.rom
 python tools/verify_patch_files.py path/to/original.rom
+python tools/verify_selector.py path/to/original.rom
 ```
 
 `dist/` にIPSとハッシュ一覧、`build/` に適用済みROMとコードの一覧を生成します。ビルダーは入力ROMのハッシュが異なる場合に停止します。
+
+選択ツールの検証はCLIとTcl/Tkの画面処理も対象です。画面環境がない場合は `verify_selector.py` に `--skip-gui` を指定できます。その場合、記録にも画面処理が未検証であることを残します。
 
 エミュレーターの診断を再実行する場合は、openMSXのポータブル版を用意してください。
 
@@ -105,6 +141,6 @@ python tools/capture_edge_screenshot.py --rom build/combined.rom --openmsx path/
 
 撮影画像は `build/screenshot/` に保存します。掲載画像は `zombie-left-01.png` です。
 
-実装は [tools/patches.py](tools/patches.py)、可逆圧縮と表示データの整理は [tools/compact_assets.py](tools/compact_assets.py) にあります。追加コードは原ROMのバンク6内へ収め、起動時にRAM `$E618–E7FF` と `$F100–F1C8` 内へ配置します。3機能版の追加コードは683バイトで、再配置したROM領域には113バイトの余裕があります。通常の更新中に追加コード用のバンク切替は行いません。
+実装は [tools/fixes/](tools/fixes/) の項目別モジュール、登録は [tools/feature_catalog.py](tools/feature_catalog.py)、統合と配置は [tools/patches.py](tools/patches.py)、可逆圧縮と表示データの整理は [tools/compact_assets.py](tools/compact_assets.py) にあります。追加コードは原ROMのバンク6内へ収め、起動時にRAM `$E618–E7FF` と `$F100–F1C8` 内へ配置します。3機能版の追加コードは683バイトで、再配置したROM領域には113バイトの余裕があります。通常の更新中に追加コード用のバンク切替は行いません。
 
 RAMの利用範囲は、[MSX2 Technical Handbookのカートリッジ作業領域の説明](https://konamiman.github.io/MSX2-Technical-Handbook/md/Chapter5b.html)と、原作のスタック・変数・画像バッファの配置を確認して選んでいます。
