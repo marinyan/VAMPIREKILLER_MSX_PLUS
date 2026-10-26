@@ -65,6 +65,7 @@ def make_expanded(source, selected, catalog):
     emit_bridge(resident)
     extension = BankedCode(resident.labels["extension_call"])
     extension.enabled = {fix.id for fix in selected}
+    extension.source = source
     for fix in selected:
         if fix.extended_helpers and fix.emit_helpers:
             fix.emit_helpers(extension)
@@ -72,6 +73,9 @@ def make_expanded(source, selected, catalog):
     if has_claims:
         from fixes.projectile_support import emit_claims
         emit_claims(extension)
+    if extension.enabled & {"pause_visibility", "weapon_graphics"}:
+        from fixes.display_support import emit as emit_display_support
+        emit_display_support(extension)
     body = extension.finish()
     if len(body) > 8192:
         raise ValueError("Extension code exceeds one 8 KiB bank")

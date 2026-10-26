@@ -346,11 +346,17 @@ def main():
                      "test_window_details_full_text_and_language_change"):
             suite.addTest(WindowChecks(name))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
+    campaign_config = ROOT / "examples/verified-campaign-29.json"
+    campaign_record = json.loads((ROOT / "dist/expanded-route-verification.json").read_text(encoding="utf-8"))
+    verified_campaign_hash = build_selection(source, read_config(campaign_config)).report["rom_sha256"]
+    if verified_campaign_hash != campaign_record["rom_sha256"]:
+        raise ValueError("The frozen campaign configuration no longer reproduces its verified ROM")
     report = dict(status="passed" if result.wasSuccessful() else "failed", tests=result.testsRun,
                   gui_tested=not args.skip_gui, source_sha256=SOURCE_SHA256,
                   registered_fixes=[fix.id for fix in CATALOG],
                   all_fixes_rom_sha256=build_selection(source, [fix.id for fix in CATALOG]).report["rom_sha256"],
                   matches_published_patches={name: data["rom_sha256"] for name, data in SelectorChecks.manifest.items()},
+                  verified_campaign_rom_sha256=verified_campaign_hash,
                   synthetic_inline_extension_fixes=20)
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "report.json").write_bytes(json_bytes(report))

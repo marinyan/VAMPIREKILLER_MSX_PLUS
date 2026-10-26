@@ -29,6 +29,9 @@
     "jumper_land",
     "water_pending",
     "actor_order",
-    "phantom_gate"
+    "phantom_gate",
+    "pause_visibility",
+    "item_priority",
+    "weapon_graphics"
   ]
 }

@@ -1,7 +1,7 @@
 {
   "status": "passed",
   "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
-  "rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
+  "rom_sha256": "1a72c11f135214b52cd8d2271d0c8e5e7fdaf4e248234794be19de5ca103c5c0",
   "rom_bytes": 262144,
   "selected_fixes": [
     "fall_attack",
@@ -32,20 +32,23 @@
     "jumper_land",
     "water_pending",
     "actor_order",
-    "phantom_gate"
+    "phantom_gate",
+    "pause_visibility",
+    "item_priority",
+    "weapon_graphics"
   ],
   "original_asset_bank_bytes_unchanged": 98304,
   "asset_banks_unchanged": true,
   "asset_recompression": false,
   "poses_equal": 168,
   "item_candle_vram_bytes_equal": 131072,
-  "resident_bytes": 989,
-  "extension_code_bytes": 1051,
-  "extension_free_bytes": 6152,
+  "resident_bytes": 1017,
+  "extension_code_bytes": 2771,
+  "extension_free_bytes": 4404,
   "smoke": {
     "all": {
       "samples": 82,
-      "gameplay_samples": 76,
+      "gameplay_samples": 69,
       "visited_area_rooms": [
         [
           0,

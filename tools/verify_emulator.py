@@ -211,11 +211,12 @@ proc nextcase {} {
  set cfg [lindex $fixtures $ci]
  set si -1
  if {[lindex $cfg 5] eq "asset_vram"} {debug write_block VRAM 0 [binary decode hex [string repeat 5a 131072]]}
- foreach {a n} {0xc420 80 0xc470 256 0xc800 896 0xce00 128 0xc700 32 0xcf00 256 0xd100 768 0xc598 14 0xd700 1024 0xd618 16 0xd460 64} {zero $a $n}
+ # Do not inherit lives, inactive SAT coordinates or colors from the boot's RNG.
+ foreach {a n} {0xc410 16 0xc420 80 0xc470 256 0xc500 128 0xc800 896 0xce00 128 0xc700 32 0xcf00 256 0xd100 768 0xc598 14 0xd700 1024 0xd400 512 0xd600 128} {zero $a $n}
  for {set n 0} {$n<18} {incr n} {debug write memory [expr {0xd638+4*$n}] 224}
  debug write_block memory 0xd3c0 [binary decode hex [string repeat 01 32]]
  debug write_block memory 0xc420 [binary decode hex [lindex $cfg 0]]
- foreach {a v} {0xc000 5 0xc001 0 0xc003 0 0xc006 0 0xc007 0 0xc002 64 0xc413 1 0xc415 32 0xc416 0 0xc417 48 0xc418 0 0xc419 0 0xc41e 255 0xc41f 255 0xc5ac 0 0xd000 0 0xd001 0 0xd002 0 0xd010 0 0xd012 0 0xc701 0} {debug write memory $a $v}
+ foreach {a v} {0xc00f 0 0xc000 5 0xc001 0 0xc003 0 0xc006 0 0xc007 0 0xc002 64 0xc413 1 0xc415 32 0xc416 0 0xc417 48 0xc418 0 0xc419 0 0xc41e 255 0xc41f 255 0xc5ac 0 0xd000 0 0xd001 0 0xd002 0 0xd010 0 0xd012 0 0xc701 0} {debug write memory $a $v}
  foreach tile [lindex $cfg 4] {
   lassign $tile x y v
   debug write memory [expr {0xd100+((($y-16)/8)*32)+($x/8)}] $v

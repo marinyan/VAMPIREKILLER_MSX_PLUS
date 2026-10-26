@@ -1,7 +1,7 @@
 {
   "format": "vampire-killer-ips-catalog-v1",
   "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
-  "all_fixes_rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
+  "all_fixes_rom_sha256": "1a72c11f135214b52cd8d2271d0c8e5e7fdaf4e248234794be19de5ca103c5c0",
   "bugs": [
     "msx.actor_alloc",
     "msx.actor_order",
@@ -351,6 +351,33 @@
       "expanded_rom": true,
       "description_ja": "バグ説明\n門のない部屋では門の座標が0になりますが、移動処理が門の有無を確認しないため、左上に見えない門があるように一時的に止まります。左向きのジャンプなどで発生します。\n\n発生する場面\n門のない部屋の左上へ向かい、X8〜15・Y2〜49付近を左向きに通過する場面です。位置や向きが範囲外になると動けます。\n\n修正後の動作\n門が存在しない場合だけ門への接触確認を省略し、そのまま通常の横移動へ進めます。実在する門の開閉、停止範囲、通過タイミングや通常の壁は変えません。",
       "description_en": "Bug description\nRooms without a gate leave its coordinates at zero, but movement still tests those coordinates as a real gate. Leftward jumps near the upper-left corner can briefly stick against an invisible boundary.\n\nWhen it happens\nMove left near X8–15 and Y2–49 in a room without a gate. Movement resumes after the position or direction leaves the affected range.\n\nWith this fix\nSkip only the gate collision query when no gate exists, then continue ordinary movement. Preserve actual gates, their open/closed states, blocking bounds, transition timing, and ordinary walls."
+    },
+    {
+      "id": "pause_visibility",
+      "title_ja": "PAUSE文字を見やすくする",
+      "title_en": "Readable pause message",
+      "bug_ids": [],
+      "expanded_rom": true,
+      "description_ja": "挙動の説明（挙動改善）\nPAUSE文字は背景へ描かれるため、停止した主人公・敵・武器のスプライトが重なると文字を隠すことがあります。\n\n発生する場面\n画面中央付近で、スプライトがPAUSE文字の48×16ドットの領域へ重なった状態でポーズします。\n\n修正後の動作\n文字と重なるハードウェアスプライトだけを一時的に非表示にします。横位置を32ドットずらす表示属性も行ごとに確認し、解除時に元の表示順と座標を復元します。ゲーム中の座標・攻撃状態・音源へのポーズ要求は変えません。\n\n補足\n表示の改善項目です。スプライト枠を追加せず、文字領域外のスプライトと、文字の背景保存・復元を維持します。",
+      "description_en": "Behavior description (behavior change)\nThe pause message is drawn into the background, so a stopped player, enemy, or weapon sprite can cover it.\n\nWhen it happens\nPause while a sprite intersects the message's 48 by 16 pixel rectangle near the center of the screen.\n\nWith this fix\nTemporarily hide only intersecting hardware sprites, checking each overlapping scanline's 32-pixel early-clock shift. Restore the original order and coordinates on resume without changing gameplay state or sound pause requests.\n\nNotes\nThis is a display improvement. It adds no sprite slots and preserves sprites outside the message and the original background save/restore."
+    },
+    {
+      "id": "item_priority",
+      "title_ja": "重なったアイテムの表示順",
+      "title_en": "Overlapping ground-item priority",
+      "bug_ids": [],
+      "expanded_rom": true,
+      "description_ja": "挙動の説明（挙動改善）\n同じ場所へ地上アイテムが重なると、内部の空き枠へ入った順によって宝箱やハートが隠れ、何が残っているか分かりにくくなります。\n\n発生する場面\n宝箱・通常アイテム・大小のハートが同じ場所や近い場所へ重なって着地したときです。\n\n修正後の動作\n状態更新と取得判定は従来の8枠順のまま実行し、最後の画像だけを宝箱、その他のアイテム、大ハート、小ハートの順に重ねます。上側を取る・消える場面でも、残っているものを描き直します。枠の入れ替え、寿命や効果の変更は行いません。\n\n補足\n表示の改善項目です。同じ種類が重なった場合の表示順は、従来の枠順を維持します。",
+      "description_en": "Behavior description (behavior change)\nWhen ground items overlap, allocation order can let a chest or another drop hide a heart, making the remaining items difficult to distinguish.\n\nWhen it happens\nA chest, ordinary drop, or heart settles over or near another ground item.\n\nWith this fix\nKeep all eight records' updates and pickup checks in their original order, then compose chests, other drops, large hearts, and small hearts in that order. Redraw survivors after removal without rearranging records or changing lifetimes and effects.\n\nNotes\nThis is a display improvement. Items within the same class retain their original slot order."
+    },
+    {
+      "id": "weapon_graphics",
+      "title_ja": "飛行中の武器の画像を保つ",
+      "title_en": "Flying weapon image ownership",
+      "bug_ids": [],
+      "expanded_rom": true,
+      "description_ja": "挙動の説明（挙動改善）\n投げた剣などが画面に残っている間に別の武器へ持ち替えると、共有している画像が上書きされ、以前の武器の軌道のまま新しい武器の絵で飛ぶことがあります。\n\n発生する場面\n飛行中の主武器が残る状態で、別種類の主武器を取得したり、共有画像を更新する攻撃へ移ったときです。\n\n修正後の動作\n各投射枠の武器種と現在の絵に応じて画像を表示します。使用中のスプライト画像枠は避け、借りた画像領域は次のゲーム更新より前に元へ戻します。飛行・反転・当たり判定・装備の取得や喪失、聖水と敵の画像は変えません。\n\n補足\n表示の改善項目です。画像は入力された原版ROMから生成し、配布ツールには画像データを収録しません。",
+      "description_en": "Behavior description (behavior change)\nChanging equipment while a thrown weapon remains can overwrite its shared image, making the old projectile fly along its original trajectory with the new weapon's appearance.\n\nWhen it happens\nCollect a different primary weapon, or perform an attack that refreshes the shared patterns, while an earlier primary projectile is still flying.\n\nWith this fix\nDisplay each projectile from its own type and pose. Borrow only unreferenced sprite-pattern slots and restore them before the next game update. Preserve trajectories, reversals, collisions, equipment ownership, holy water, and enemy images.\n\nNotes\nThis is a display improvement. Images are generated from the supplied original ROM; the distributed tool contains no image data."
     }
   ]
 }

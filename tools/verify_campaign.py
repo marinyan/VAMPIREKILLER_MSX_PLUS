@@ -17,6 +17,7 @@ def main():
  p.add_argument('--rom',type=Path,default=Path('build/combined.rom'))
  p.add_argument('--source-rom',type=Path,help='Original ROM for verifying a selectable build')
  p.add_argument('--config',type=Path,help='Selection JSON; requires --source-rom')
+ p.add_argument('--audit-display-workspace',action='store_true',help='Read-only audit of the display cache workspace without weapon_graphics selected')
  p.add_argument('--openmsx',type=Path,default=Path('.local/openmsx/openmsx.exe'))
  a=p.parse_args();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False)
  if bool(a.source_rom)!=bool(a.config):p.error('--source-rom and --config must be supplied together')
@@ -85,6 +86,8 @@ after time 0.1 {reverse savereplay -maxnofextrasnapshots 0 @SEED@;exit}
   manifest=json.loads((ROOT/'dist/manifest.json').read_text())['variants']['combined']
   assert sha(a.rom)==manifest['rom_sha256'] and a.rom.stat().st_size==131072
  rom=a.rom.read_bytes();checks='\n'.join('if {[binary encode hex [debug read_block memory %d %d]] ne "%s"} {finish resident-corruption;return}'%(c['address'],c['size'],rom[c['source_offset']:c['source_offset']+c['size']].hex())for c in manifest['ram_chunks'])
+ if a.audit_display_workspace and 'weapon_graphics' in manifest.get('selected_fixes',[]):
+  p.error('Workspace availability must be audited without weapon_graphics selected')
  rel=lambda x:os.path.relpath(x,ROOT).replace('\\','/')
  tcl=r'''
 set renderer none
@@ -127,6 +130,22 @@ debug set_bp 0x414d {} {if {[catch {vk_observe} err]} {set ef [open @OUT@/observ
 after time 6000 {finish game-time-limit}
 after realtime 150 {finish host-time-limit}
 '''.replace('@OUT@',rel(out)).replace('@RECORDING@',rel(a.recording.resolve())).replace('@LIMIT@',str(limit)).replace('@CHECKS@',checks)
+ if a.audit_display_workspace:
+  audit='''
+ global vk_display_start
+ if {$vk_n==0} {
+  set vk_display_start [debug read_block VRAM 0x10000 128]
+  set vf [open @OUT@/workspace-initial.bin wb]
+  fconfigure $vf -translation binary
+  puts -nonewline $vf $vk_display_start
+  close $vf
+ }
+ if {[binary encode hex [debug read_block memory 0xc4f0 5]] ne "0000000000" || [debug read_block VRAM 0x10000 128] ne $vk_display_start} {
+  finish display-workspace-conflict
+  return
+ }
+'''.replace('@OUT@',rel(out))
+  tcl=tcl.replace(' if {$vk_n%100==0}',audit+' if {$vk_n%100==0}')
  (out/'replay.tcl').write_text(tcl)
  user=out/'user';user.mkdir()
  env=dict(os.environ,OPENMSX_USER_DATA=rel(user),OPENMSX_SYSTEM_DATA=rel(a.openmsx.resolve().parent/'share'))
@@ -169,6 +188,12 @@ after realtime 150 {finish host-time-limit}
                selected_fixes=manifest.get('selected_fixes',['fall_attack','screen_edges']),
                fresh_power_on_seed=bool(a.inputs),final_boss_phases=sorted(final_boss_phases),
                falling_with_attack_updates=fall_attack_updates,ordinary_death_sequences=deaths)
+ if a.audit_display_workspace:
+  report['display_workspace_audit']=dict(status='passed'if matched else'failed',observations=rows,
+      RAM_address=0xC4F0,RAM_bytes=5,RAM_remained_zero=matched,
+      VRAM_address=0x10000,VRAM_bytes=128,VRAM_unchanged=matched,
+      initial_VRAM_sha256=sha(out/'workspace-initial.bin'),
+      scope='Read at every sampled update of this complete campaign; no workspace writes performed.')
  (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
  print(json.dumps({k:report[k]for k in('status','completed_campaign','replay_matches_source','updates','bosses_defeated','credits_seen','host_seconds')}),flush=True)
  assert report['status']=='passed',differences[:1]

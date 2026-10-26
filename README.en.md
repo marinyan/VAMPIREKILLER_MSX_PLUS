@@ -45,7 +45,7 @@ The generator checks the input size and hash before building. IPS itself does no
 
 ## Available items
 
-The current tool covers 29 bugs plus the screen-edge behavior improvement. The two shield bugs share one checkbox, leaving 29 selectable items. The catalog is extensible and has no fixed item count.
+The tool covers 29 bugs plus screen-edge, pause, ground-item, and flying-weapon display improvements. The two shield bugs share one checkbox, leaving 32 selectable items. The catalog is extensible and has no fixed item count.
 
 | ID | Item |
 |---|---|
@@ -78,6 +78,9 @@ The current tool covers 29 bugs plus the screen-edge behavior improvement. The t
 | `water_pending` | Holy-water and pending-throw overlap |
 | `actor_order` | Actor scan order after spawning |
 | `phantom_gate` | Phantom gate at the screen origin |
+| `pause_visibility` | Readable pause message |
+| `item_priority` | Overlapping ground-item priority |
+| `weapon_graphics` | Flying weapon image ownership |
 
 The earlier Weapons during falls item also protects pending throws. `water_pending` makes this correction independently selectable without enabling falling attacks. Selecting both is supported.
 
@@ -87,9 +90,11 @@ Full symptoms and triggers appear in the tool and the [catalog JSON](dist/catalo
 
 ## Verification scope
 
-The 26 new items were checked in 28 configurations: original, each new item alone, and all items together. Each ran 5,895 cases and 6,612 function returns in openMSX 21.0 / C-BIOS MSX2 JP. These are arranged function/segment diagnostics using the original cartridge routines with input RAM/registers. They cover disabled controls, shared projectile metadata, two-slot collisions, allocation rollback, and area transitions combining shields and time stop. See the [bug verification record](dist/bug-verification.json).
+The 29 extension items were checked in 31 configurations: original, each new item alone, and all items together. Each ran 5,895 cases and 6,612 function returns in openMSX 21.0 / C-BIOS MSX2 JP. These are arranged function/segment diagnostics using the original cartridge routines with input RAM/registers. They cover disabled controls, shared projectile metadata, two-slot collisions, allocation rollback, and area transitions combining shields and time stop. See the [bug verification record](dist/bug-verification.json).
 
 For the all-items build, all 98,304 bytes in the original asset banks remain unchanged. All 168 pose position/pattern/color transfers and all 128 KiB of VRAM after item/candle upload match the original. A separate 63.5-second run from power-on using ordinary keyboard input traversed three outdoor and three castle screens and checked resident code in 82 samples. See the [size, graphics, and opening-input record](dist/expanded-verification.json).
+
+The three display additions have separate Z80/VDP tests: 19 pause cases with 122 intersections, 24 ground-item order permutations and removal restoration, and 63 flying-weapon cases covering types, poses, equipment changes, pause/resume, and a subsequent frame's graphics upload. These include sprite priority during boss fights and special doors. Generated weapon images match the original transfers, while gameplay records and slot order remain unchanged. See the [display tests](dist/display-verification.json) and the [workspace audit](dist/display-workspace-verification.json) sampled throughout the frozen 29-option campaign. These are arranged display diagnostics, separate from an ordinary-input full clear.
 
 The original and all-items build also passed 478 shield cases and 582 function returns each. See the [expanded shield record](dist/expanded-shield-verification.json).
 
@@ -99,7 +104,7 @@ The earlier full-campaign run applies to the 1 Mbit falling-attack + screen-edge
 
 The 2 Mbit build with all 29 options also completed all 19 areas, 137 screens, six bosses and both final forms, all 41 ending messages, and the active start and movement of the next loop. A recording replay and a second replay from a fresh power-on seed matched all 59,346 observations and 594 work-RAM samples. The route includes two ordinary deaths and life recoveries, with no midgame restores or game RAM, PC, or ROM writes. The [complete-campaign record](dist/expanded-route-verification.json), [ROM-free input archive](dist/expanded-route-inputs.json.gz), and [frozen 29-option selection](examples/verified-campaign-29.json) are included.
 
-This covers the first clear and next-loop start. It does not establish absence of every bug, a complete second loop, or operation on physical hardware.
+The complete-campaign record applies to the frozen 29-option selection. The current 32-option selection, including the three display additions, has the display/function diagnostics and opening-input checks above. The complete-campaign record covers the first clear and next-loop start. It does not establish absence of every bug, a complete second loop, or operation on physical hardware.
 
 ## Repeating checks and adding fixes
 
@@ -108,6 +113,7 @@ python tools/verify_patch_files.py path/to/original.rom
 python tools/verify_bugs.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_expanded.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_shield.py path/to/original.rom --openmsx path/to/openmsx.exe --all-fixes --out build/expanded-shield-verification
+python tools/verify_display.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_selector.py path/to/original.rom
 python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/verified-campaign-29.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay
 ```

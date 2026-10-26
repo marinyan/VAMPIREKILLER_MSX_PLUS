@@ -4,6 +4,7 @@ import hashlib
 import json
 import zipfile
 from feature_catalog import CATALOG
+from selection_build import read_config
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -74,11 +75,30 @@ def main():
     route_inputs = ROOT / "dist/expanded-route-inputs.json.gz"
     route = json.loads(route_path.read_text(encoding="utf-8"))
     if (route["status"] != "passed" or not route["completed_campaign"] or not route["replay_matches_source"]
-            or route["rom_sha256"] != all_build["rom_sha256"]
-            or route["selected_fixes"] != expected_ids
+            or route["rom_sha256"] != selector["verified_campaign_rom_sha256"]
+            or route["selected_fixes"] != read_config(ROOT / "examples/verified-campaign-29.json")
+            or not set(route["selected_fixes"]) <= set(expected_ids)
             or not route["independent_work_RAM_match"]
             or hashlib.sha256(route_inputs.read_bytes()).hexdigest() != route["input_archive_sha256"]):
-        raise ValueError("Current ordinary-input route replay verification is required")
+        raise ValueError("The frozen completed-campaign selection must remain reproducible")
+    display_path = ROOT / "build/display-verification/report.json"
+    workspace_path = ROOT / "build/display-workspace-verification.json"
+    display = json.loads(display_path.read_text(encoding="utf-8"))
+    workspace = json.loads(workspace_path.read_text(encoding="utf-8"))
+    if (display["status"] != "passed" or display["selected_fixes"] != expected_ids
+            or display["rom_sha256"]["all"] != all_build["rom_sha256"]
+            or not display["input_ROM_weapon_images_match_original_transfers"]
+            or not display["original_slot_order_gameplay_preserved"]
+            or not display["linear_boss_and_door_priority_preserved"]
+            or not display["pause_intersections"] or not display["original_item_order_differences"]
+            or not display["original_removal_differences"] or not display["original_weapon_image_differences"]
+            or workspace["status"] != "passed" or workspace["rom_sha256"] != route["rom_sha256"]
+            or workspace["updates"] != route["updates"]
+            or workspace["source_trace_sha256"] != route["source_trace_sha256"]
+            or not workspace["RAM_remained_zero"] or not workspace["VRAM_unchanged"]):
+        raise ValueError("Current display corrections and their workspace audit must pass")
+    (ROOT / "dist/display-verification.json").write_bytes(display_path.read_bytes())
+    (ROOT / "dist/display-workspace-verification.json").write_bytes(workspace_path.read_bytes())
     campaign = json.loads(campaign_path.read_text(encoding="utf-8"))
     if campaign["status"] != "passed" or not campaign["completed_campaign"]:
         raise ValueError("A completed campaign verification is required")
@@ -95,6 +115,7 @@ def main():
              ROOT / "dist/selector-verification.json",
              ROOT / "dist/bug-verification.json", ROOT / "dist/expanded-verification.json",
              ROOT / "dist/expanded-shield-verification.json",
+             ROOT / "dist/display-verification.json", ROOT / "dist/display-workspace-verification.json",
              campaign_path, campaign_inputs, route_path, route_inputs,
              *sorted((ROOT / "docs/images").glob("*"))]
     target = ROOT / "dist/VAMPIREKILLER_MSX_PLUS_generator.zip"

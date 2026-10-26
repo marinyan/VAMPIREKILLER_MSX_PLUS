@@ -743,7 +743,8 @@ def main():
         parser.error("Unsupported input ROM")
     catalog = tuple({fix.id: fix for fix in (*CATALOG, *NEW_FIXES)}.values())
     names = [fix.id for fix in NEW_FIXES]
-    profiles = {"original": [], **{name: [name] for name in (args.only if args.only is not None else names)},
+    single_profiles = [fix.id for fix in catalog if fix.extended_helpers]
+    profiles = {"original": [], **{name: [name] for name in (args.only if args.only is not None else single_profiles)},
                 "all": [fix.id for fix in catalog]}
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)

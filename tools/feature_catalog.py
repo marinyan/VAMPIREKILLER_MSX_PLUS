@@ -30,12 +30,16 @@ from fixes.jumper_land import FIX as JUMPER_LAND
 from fixes.water_pending import FIX as WATER_PENDING
 from fixes.actor_order import FIX as ACTOR_ORDER
 from fixes.phantom_gate import FIX as PHANTOM_GATE
+from fixes.pause_visibility import FIX as PAUSE_VISIBILITY
+from fixes.item_priority import FIX as ITEM_PRIORITY
+from fixes.weapon_graphics import FIX as WEAPON_GRAPHICS
 
 # Add a fix module above and register it here. Order is stable for ROM layout.
 ADDITIONAL_FIXES = (STAIRS, TRAP_CONTACT, TRAP_ATTACK, PATROL_TIMER, MUMMY_START, REFORM_HP, STUN_HP, HOURGLASS,
                     ACTOR_ALLOC, PROJECTILE_ALLOC, EMPTY_PROJECTILE, PROJECTILE_BOX, CROUCH_FALL, PLATFORM_LAND,
                     PLATFORM_TURN, SHOP_INPUT, BOSS_SPAWN, WEAPON_OWNER, AXE_WALL, HURT_CLIP,
-                    WATER_EDGE, BAT_Y, JUMPER_LAND, WATER_PENDING, ACTOR_ORDER, PHANTOM_GATE)
+                    WATER_EDGE, BAT_Y, JUMPER_LAND, WATER_PENDING, ACTOR_ORDER, PHANTOM_GATE,
+                    PAUSE_VISIBILITY, ITEM_PRIORITY, WEAPON_GRAPHICS)
 CATALOG = (FALL_ATTACK, SCREEN_EDGES, SHIELD_FIX, *ADDITIONAL_FIXES)
 
 

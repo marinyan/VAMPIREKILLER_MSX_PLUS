@@ -45,7 +45,7 @@ python tools/patch_selector.py path/to/original.rom --config build/my-selection.
 
 ## 選択できる修正
 
-現在は29件の不具合への対応と画面端の挙動改善を収録しています。盾の2件を1項目にまとめているため、選択欄は29項目です。項目数は固定せず、修正ごとに追加できます。
+現在は29件の不具合への対応と、画面端・PAUSE・地上アイテム・飛行武器の表示改善を収録しています。盾の2件を1項目にまとめているため、選択欄は32項目です。項目数は固定せず、修正ごとに追加できます。
 
 | ID | 内容 |
 |---|---|
@@ -78,6 +78,9 @@ python tools/patch_selector.py path/to/original.rom --config build/my-selection.
 | `water_pending` | 聖水と発射待ちの剣が同じ枠を使う |
 | `actor_order` | 敵の生成で同じ敵が二度動く |
 | `phantom_gate` | 門のない部屋の左上で引っ掛かる |
+| `pause_visibility` | PAUSE文字を見やすくする |
+| `item_priority` | 重なったアイテムの表示順 |
+| `weapon_graphics` | 飛行中の武器の画像を保つ |
 
 聖水と剣の予約枠競合は、従来の「落下中の武器使用」にも対策を含みます。`water_pending` は、その対策だけを単独で選ぶ項目です。両方の選択にも対応します。
 
@@ -87,9 +90,11 @@ python tools/patch_selector.py path/to/original.rom --config build/my-selection.
 
 ## 検証の範囲
 
-新しい26項目は原版・各単独構成・全項目構成の28構成で、各5,895条件・6,612回の関数終了をopenMSX 21.0／C-BIOS MSX2 JPで確認しました。原ROMのコードへ入力RAM・レジスターを用意する関数・区間診断です。単独OFF時、共有する投擲メタデータ、2枠の判定、生成失敗時の予約、盾と時止めを同時に持つステージ移動などを含みます。[バグ修正の検証記録](dist/bug-verification.json)を参照してください。
+拡張29項目は原版・各単独構成・全項目構成の31構成で、各5,895条件・6,612回の関数終了をopenMSX 21.0／C-BIOS MSX2 JPで確認しました。原ROMのコードへ入力RAM・レジスターを用意する関数・区間診断です。単独OFF時、共有する投擲メタデータ、2枠の判定、生成失敗時の予約、盾と時止めを同時に持つステージ移動などを含みます。[バグ修正の検証記録](dist/bug-verification.json)を参照してください。
 
 全項目構成では、元のデータ用バンク98,304バイトがそのままであること、全168ポーズの位置・パターン・色、アイテム・燭台読み込み後のVRAM全128 KiBが原版と一致することを確認しました。別途、電源投入から通常キー入力だけで63.5秒動かして屋外3画面・城内3画面を通り、82回のサンプルで追加コードの保持を確認しています。[容量・画像・序盤操作の記録](dist/expanded-verification.json)に保存しています。
+
+追加の表示3項目は、PAUSEの19条件・122か所の重なり、地上アイテム24通りの配置順と消滅後の復元、飛行武器63条件の種類・絵・持ち替え・ポーズ解除・次フレーム転送を原作Z80とVDP上で確認しました。ボス戦・特殊扉でのスプライト表示順も含みます。入力ROMから生成した武器画像は元の転送結果と一致し、ゲーム状態と元の枠順を維持します。[表示診断](dist/display-verification.json)と、29項目版の全編59,346更新を読む[作業領域の監査](dist/display-workspace-verification.json)に記録しています。これらは配置を明示した表示診断で、通常攻略の全編記録とは別の検証です。
 
 全項目構成の盾専用診断も、原版と各478条件・582回の関数終了を確認しました。[盾の検証記録](dist/expanded-shield-verification.json)を参照してください。
 
@@ -99,7 +104,7 @@ python tools/patch_selector.py path/to/original.rom --config build/my-selection.
 
 29項目をすべて選んだ2Mbit構成でも、通常キー入力で全19エリア・137画面、6体のボスと最終2形態、エンディング41項目、次周開始と移動まで確認しました。記録再生と新しい電源投入状態からの入力再生の2回で、全59,346更新と594回の作業RAM照合が一致しました。通常の残機消費・復帰2回を含み、途中の状態復元やゲームのRAM・PC・ROM書き換えは行っていません。[全編の検証記録](dist/expanded-route-verification.json)と[ROMを含まない入力](dist/expanded-route-inputs.json.gz)、対象を固定した[29項目の選択設定](examples/verified-campaign-29.json)を保存しています。
 
-この確認範囲は初回クリアと次周開始までです。全経路での不具合の不存在、2周目全編、実機の動作を保証するものではありません。
+全編記録の対象は固定した29項目の構成です。追加表示3項目を含む現在の32項目構成は、上記の表示・関数診断と序盤操作で確認しています。この全編記録の範囲は初回クリアと次周開始までです。全経路での不具合の不存在、2周目全編、実機の動作を保証するものではありません。
 
 ## 再検証と修正追加
 
@@ -108,6 +113,7 @@ python tools/verify_patch_files.py path/to/original.rom
 python tools/verify_bugs.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_expanded.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_shield.py path/to/original.rom --openmsx path/to/openmsx.exe --all-fixes --out build/expanded-shield-verification
+python tools/verify_display.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_selector.py path/to/original.rom
 python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/verified-campaign-29.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay
 ```

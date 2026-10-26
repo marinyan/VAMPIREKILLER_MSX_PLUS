@@ -32,9 +32,12 @@
     "jumper_land",
     "water_pending",
     "actor_order",
-    "phantom_gate"
+    "phantom_gate",
+    "pause_visibility",
+    "item_priority",
+    "weapon_graphics"
   ],
-  "all_fixes_rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
+  "all_fixes_rom_sha256": "1a72c11f135214b52cd8d2271d0c8e5e7fdaf4e248234794be19de5ca103c5c0",
   "matches_published_patches": {
     "fall_attack": "e67184071705b7862c10bf4ec1773ef2c80ad3e4b9d88eaa8c8fb8864fbd7734",
     "screen_edges": "0085d22ad5c6377d494ec9a025bb938e548fbec5a3bb74aa55939902365b3917",
@@ -44,5 +47,6 @@
     "screen_edges_shield": "f82aa5858b0716da739b3fed4f0ca03232e9d79b8076b8e58e36279677ce09c0",
     "combined_shield": "7f3f1b540bed27dca43ba1191973bec060716d5e52c7bf52dce3270a6a297dd2"
   },
+  "verified_campaign_rom_sha256": "6046885bc1d69e7a2a8b1ef50d25911008d615c4b483808e8230dfb37e221b22",
   "synthetic_inline_extension_fixes": 20
 }
