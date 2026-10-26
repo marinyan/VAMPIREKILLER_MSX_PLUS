@@ -1,0 +1,320 @@
+{
+  "format": "vampire-killer-ips-catalog-v1",
+  "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+  "all_fixes_rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+  "bugs": [
+    "msx.actor_alloc",
+    "msx.axe_wall",
+    "msx.bat_y",
+    "msx.boss_spawn",
+    "msx.crouch_fall",
+    "msx.empty_projectile",
+    "msx.fall_attack",
+    "msx.hourglass",
+    "msx.hurt_clip",
+    "msx.jumper_land",
+    "msx.mummy_start",
+    "msx.patrol_timer",
+    "msx.platform_land",
+    "msx.platform_turn",
+    "msx.projectile_alloc",
+    "msx.projectile_box",
+    "msx.reform_hp",
+    "msx.shield_area",
+    "msx.shield_break",
+    "msx.shop_input",
+    "msx.stairs",
+    "msx.stun_hp",
+    "msx.trap_attack",
+    "msx.trap_contact",
+    "msx.water_edge",
+    "msx.weapon_owner"
+  ],
+  "fixes": [
+    {
+      "id": "fall_attack",
+      "title_ja": "落下中の武器使用",
+      "title_en": "Weapons during falls",
+      "bug_ids": [
+        "msx.fall_attack"
+      ],
+      "expanded_rom": false,
+      "description_ja": "バグ説明\n足場から歩いて落ちると、地上で始めた鞭などの攻撃が着地するまで途中で止まります。また、落下中に特殊武器を使おうとしても受け付けられません。ジャンプ中にはできる攻撃が、歩いて落ちた場合には続かないという違いがあります。\n\n発生する場面\n足場の端から歩いて落ちる前後に攻撃する、またはその落下中に特殊武器を使う操作をします。\n\n修正後の動作\n歩いて落ちている間も攻撃の動きと表示が進み、鞭・剣・斧・十字架・聖水・砂時計を使えます。発射待ちの剣があるときに、聖水がその枠を上書きすることも防ぎます。\n\n補足\n落下速度、着地の判定と音は変えません。被弾中や死亡中の攻撃制限も維持します。",
+      "description_en": "Bug description\nWhen you walk off a ledge, an attack started on the ground stops progressing until you land. Special-weapon input is also rejected during that fall. Attacks that work during a jump therefore stop or become unavailable when you fall by walking off an edge.\n\nWhen it happens\nAttack just before walking off a ledge, or try to use a special weapon during the resulting fall.\n\nWith this fix\nAttacks continue progressing and displaying during the fall, and the whip, sword, axe, cross, holy water, and stopwatch remain usable. Holy water also cannot overwrite a sword slot that is still waiting to launch.\n\nNotes\nFalling speed, landing detection and sound, and the attack restrictions during injury or death are preserved."
+    },
+    {
+      "id": "screen_edges",
+      "title_ja": "画面端の処理",
+      "title_en": "Screen-edge behavior",
+      "bug_ids": [],
+      "expanded_rom": false,
+      "description_ja": "挙動の説明（挙動改善）\n周期的に現れるゾンビやコウモリなどが、画面の端より内側に突然現れます。小ハートは左右へ揺れて画面端へ達すると、その判定だけで消えることがあります。剣と一部の直進する敵弾も、絵がまだ画面内に残っている段階で消えます。この項目は、これらの出現と消失を画面端で自然に見せるための挙動改善です。\n\n発生する場面\n周期出現する敵を待つ、小ハートが画面端へ揺れるまで待つ、または剣・対象の敵弾が左右端へ進む場面で見られます。\n\n修正後の動作\n対象の敵は左右端から一部ずつ姿を現します。ゾンビの出現先に床がない場合は元の位置を使います。小ハートは横方向を画面内へ収め、画面端だけを理由に消えません。剣と対象の敵弾は絵が全部画面外へ出るまで表示し、反対側へ出現したり当たったりしないようにします。\n\n補足\n斧と十字架が端で反転して戻る動きは維持します。すべての敵や敵弾を一括変更するものではありません。敵の出現間隔、小ハートの揺れ・取得効果・着地後の寿命も変えません。",
+      "description_en": "Behavior description (behavior change)\nPeriodically spawned zombies, bats, and similar enemies can appear suddenly inside the screen. A small heart can disappear just because its horizontal sway reaches an edge. Swords and some straight-moving enemy projectiles also disappear while part of their image is still visible. This option changes those entry and exit behaviors at the screen edges.\n\nWhen it happens\nWait for a periodic enemy spawn, let a small heart sway to an edge, or let a sword or an affected enemy projectile travel off either side of the screen.\n\nWith this fix\nAffected enemies enter gradually from the edges. Zombies keep their original spawn position if the edge has no floor. Small hearts stay within the horizontal bounds instead of disappearing at an edge. Swords and affected projectiles remain visible until the whole image is outside and cannot wrap around to appear or collide on the opposite side.\n\nNotes\nAxes and crosses still turn back at the edges. This does not change every enemy or projectile. Spawn timing and small hearts' sway, pickup effects, and lifetime after landing are preserved."
+    },
+    {
+      "id": "shield_fix",
+      "title_ja": "盾の耐久修正",
+      "title_en": "Shield durability",
+      "bug_ids": [
+        "msx.shield_area",
+        "msx.shield_break"
+      ],
+      "expanded_rom": false,
+      "description_ja": "バグ説明\nこの項目は盾に関する2つの不具合をまとめて直します。\n① 盾を持ったまま通常のステージを移動すると、装備は残るのに残り耐久だけが0になります。そのまま防御すると0から255へ戻り、本来より長く使えてしまいます。\n② 弾を防ぐ盾が最後の耐久を使い切っても、同じ処理で重なった残りの弾まで防ごうとし、耐久が再び0から255へ戻ることがあります。\n\n発生する場面\n盾を装備して白い鍵で通常のステージを移動し、その後に防御します。もう一方は、弾を防ぐ盾の残り耐久が1のときに複数の弾が同時に重なると発生します。\n\n修正後の動作\n通常のステージ移動では残り耐久をそのまま持ち越します。最後の1回を使った盾は解除し、その盾で同時に重なった残りの弾まで防ぎません。耐久0の盾による0→255の巻き戻りも防ぎます。\n\n補足\n接触ダメージを減らす盾と、弾を防ぐ盾の両方が対象です。取得時は16回分です。ボス撃破後やミス後には、通常どおり盾を外し、耐久も0にします。",
+      "description_en": "Bug description\nThis item fixes two shield bugs.\n1. An ordinary area transition leaves the shield equipped but resets its remaining durability to zero. The next block wraps zero to 255, allowing far more uses than intended.\n2. When a projectile-blocking shield uses its last charge, it can continue blocking other projectiles in the same update and wrap durability from zero to 255 again.\n\nWhen it happens\nCarry a shield through a white-key area transition and then block an attack. The second bug occurs when multiple projectiles overlap a projectile shield with one charge left.\n\nWith this fix\nOrdinary area changes retain the remaining charges. A shield is removed after its final use, and it does not block the remaining projectiles in that update. An exhausted shield cannot wrap zero durability to 255.\n\nNotes\nBoth the contact-damage reduction shield and projectile-blocking shield are covered. A new shield has 16 charges. Boss clears and lost lives still remove the equipment and clear durability."
+    },
+    {
+      "id": "stairs",
+      "title_ja": "階段の終端を通り抜ける",
+      "title_en": "Stair endpoint checks",
+      "bug_ids": [
+        "msx.stairs"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n階段を長く上り下りして移動回数が一周すると、階段へ入った直後の特例が再び適用され、終端から壁や本来の通路外へ進めます。\n\n発生する場面\n階段で上り下りを繰り返し、移動回数が一周する付近で終端へ向かいます。\n\n修正後の動作\n回数が一周しても終端の確認を続けます。階段へ初めて入った直後の処理と、通常の速度・向き・攻撃による停止は維持します。",
+      "description_en": "Bug description\nAfter enough movement on stairs, a wrapping counter reactivates the entry exception and allows movement past an endpoint into walls or unintended passages.\n\nWhen it happens\nRepeatedly move up and down stairs, then approach an endpoint as the movement counter wraps.\n\nWith this fix\nWrapping no longer disables endpoint checks. Initial entry, normal movement speed and direction, and attack pauses are preserved."
+    },
+    {
+      "id": "trap_contact",
+      "title_ja": "敵と鎖罠による二重被弾",
+      "title_en": "Repeated trap damage",
+      "bug_ids": [
+        "msx.trap_contact"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n敵に触れて被弾したのと同じ更新で鎖罠にも重なると、罠の判定が被弾中を除外せず、追加でもう一度ダメージを受けます。\n\n発生する場面\n敵と鎖罠が同時に重なる場面です。通常の無敵時間の有無とは別に、その更新で既に被弾処理へ入っていることが条件です。\n\n修正後の動作\n既に被弾中、または死亡中なら罠の追加被弾を受け付けません。最初の正当な罠ダメージは維持します。",
+      "description_en": "Bug description\nTouching an enemy and a chain trap in the same update can apply damage twice because the trap does not reject an already injured player.\n\nWhen it happens\nOverlap an enemy and a chain trap in one update, after the first collision has already entered the injured state.\n\nWith this fix\nTraps reject players already injured or dead while retaining the first valid trap hit."
+    },
+    {
+      "id": "trap_attack",
+      "title_ja": "罠に当たると攻撃が残る",
+      "title_en": "Stuck attack after a trap hit",
+      "bug_ids": [
+        "msx.trap_attack"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n鞭などを振っている最中に鎖罠で被弾すると、攻撃の進行状態が残ったまま止まり、その後の操作や表示へ影響します。\n\n発生する場面\n攻撃が進んでいる途中に、新たに鎖罠のダメージを受けます。\n\n修正後の動作\n罠の被弾へ移るときに攻撃とその進行段階を解除します。罠の種類によるダメージ量は変えません。",
+      "description_en": "Bug description\nA chain-trap hit during an attack can leave the attack state frozen instead of clearing the interrupted attack.\n\nWhen it happens\nTake a new chain-trap hit while an attack is in progress.\n\nWith this fix\nEntering trap damage clears the attack and its phase without changing each trap type's damage."
+    },
+    {
+      "id": "patrol_timer",
+      "title_ja": "歩行敵の方向転換期限を取り逃す",
+      "title_en": "Patrol timer wrap",
+      "bug_ids": [
+        "msx.patrol_timer"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n歩行敵の方向転換期限が来た更新で、壁への反応やプレイヤーを向く処理が先に選ばれると、期限の補充を通らずに0から一周し、次の通常の方向転換が遅れます。\n\n発生する場面\n歩行敵のタイマーが0になる更新で、壁やプレイヤーとの位置関係による優先分岐へ入ります。\n\n修正後の動作\n期限切れのタイマーを通常の96更新へ補充します。優先分岐で決まった向きは尊重し、余計にもう一度反転させません。",
+      "description_en": "Bug description\nIf a wall or player-facing branch takes priority when a walking enemy's turn timer expires, the timer can remain zero and wrap, delaying the next ordinary turn.\n\nWhen it happens\nA priority wall or player-facing branch is taken on the update when the patrol timer expires.\n\nWith this fix\nReload an expired timer to its usual 96 updates without adding another reversal after the priority branch."
+    },
+    {
+      "id": "mummy_start",
+      "title_ja": "マミー出現直後の横移動",
+      "title_en": "Mummy initial velocity",
+      "bug_ids": [
+        "msx.mummy_start"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\nマミーが出現した場所に以前別の敵がいた場合、その敵の横速度が残ることがあります。最初の待機が終わった直後に、マミー本来の速度が設定される前の1回だけ、その速度で動きます。\n\n発生する場面\n横速度を持った敵が使っていた枠を、マミーの出現に再利用した場合です。\n\n修正後の動作\nマミーの初期化で縦速度と横速度を両方0にします。32更新の待機と、その後の本来の移動速度は維持します。",
+      "description_en": "Bug description\nA mummy can inherit horizontal velocity left by a previous enemy and move with it once after the initial wait, before its own speed is set.\n\nWhen it happens\nSpawn a mummy in a slot previously occupied by an enemy with horizontal velocity.\n\nWith this fix\nInitialize both velocity components to zero, retaining the 32-update wait and subsequent intended speed."
+    },
+    {
+      "id": "reform_hp",
+      "title_ja": "再形成する敵の耐久が一周する",
+      "title_en": "Reforming enemy health",
+      "bug_ids": [
+        "msx.reform_hp"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n崩れてから再び動き出す敵が、耐久0のまま生存状態へ戻ることがあります。その後の攻撃で耐久が0から一周し、本来より多くの攻撃に耐えます。\n\n発生する場面\n内部種別09の敵を崩し、生存して再形成する分岐を通した後、再度攻撃します。\n\n修正後の動作\nこの敵が生存して再形成へ移る場合だけ、耐久を本来の2へ戻します。通常の撃破や他の敵の耐久は変えません。",
+      "description_en": "Bug description\nA collapsing, reforming enemy can survive with zero health; a later hit wraps its health and lets it withstand too many attacks.\n\nWhen it happens\nCollapse an enemy of internal type 09, let it take the surviving reform path, and attack again.\n\nWith this fix\nRestore health to two only on this enemy's surviving reform path, leaving ordinary kills and other enemy types unchanged."
+    },
+    {
+      "id": "stun_hp",
+      "title_ja": "気絶する随伴敵の耐久が一周する",
+      "title_en": "Stunned companion health",
+      "bug_ids": [
+        "msx.stun_hp"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n攻撃を受けると気絶してから復帰する随伴敵が、耐久0のまま生存することがあります。次の命中で耐久が一周し、本来より倒しにくくなります。\n\n発生する場面\n内部種別18の随伴敵へ攻撃し、撃破ではなく気絶する条件で生存させます。\n\n修正後の動作\n生存して気絶する分岐でのみ、耐久を1へ戻します。気絶時間と、撃破する条件は維持します。",
+      "description_en": "Bug description\nA companion enemy that survives by entering a stunned state can retain zero health, which wraps on the next hit and makes it too durable.\n\nWhen it happens\nHit a type-18 companion under the conditions that make it survive by becoming stunned.\n\nWith this fix\nRestore health to one only on the surviving stun path, preserving stun duration and the normal kill conditions."
+    },
+    {
+      "id": "hourglass",
+      "title_ja": "ステージ移動後も時止めが続く",
+      "title_en": "Permanent time stop after an area change",
+      "bug_ids": [
+        "msx.hourglass"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n砂時計で時を止めたまま白い鍵で次のステージへ進むと、残り時間だけが消去され、敵などを止める状態が残ります。その結果、時止めが自然に終わらなくなります。\n\n発生する場面\n砂時計の効果が残っている間に、白い鍵で通常のステージ移動を行います。\n\n修正後の動作\nステージの初期化前に時止めを解除し、通常の満了時と同じ方法で音楽も再開させます。単なる部屋の切替では解除しません。",
+      "description_en": "Bug description\nA white-key transition during a stopwatch effect clears the countdown but can leave the frozen-world flag set, so the effect never expires naturally.\n\nWhen it happens\nTake a white-key area transition while the stopwatch is still active.\n\nWith this fix\nEnd the freeze before area initialization and resume music through the normal expiry path. Ordinary room changes do not end it early."
+    },
+    {
+      "id": "actor_alloc",
+      "title_ja": "敵の生成失敗で描画枠が残る",
+      "title_en": "Enemy allocation rollback",
+      "bug_ids": [
+        "msx.actor_alloc"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n敵を出すための描画枠が足りないと、途中まで確保した枠だけが使われたまま残ります。失敗が重なるほど空きが減り、他の敵も出せなくなることがあります。\n\n発生する場面\n敵の本体用の空きはあるものの、その敵に必要な描画枠をすべて確保できない状態で生成を試みます。\n\n修正後の動作\nその生成で新たに予約した描画枠だけを解放します。既にいる敵や弾が使っている枠、生成が成功する場合の動作は維持します。",
+      "description_en": "Bug description\nWhen an enemy cannot obtain enough sprite parts, already reserved parts can remain occupied. Repeated failures progressively reduce the available slots.\n\nWhen it happens\nAttempt to spawn an enemy when an actor record is free but there are too few sprite parts for the whole enemy.\n\nWith this fix\nRelease only the parts reserved by the failed attempt, preserving existing owners and successful spawns."
+    },
+    {
+      "id": "projectile_alloc",
+      "title_ja": "敵弾の生成失敗で描画枠が残る",
+      "title_en": "Projectile allocation rollback",
+      "bug_ids": [
+        "msx.projectile_alloc"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n敵弾を描く枠の一部だけを確保して生成に失敗すると、その予約が残ります。空きがあるように見えても、新しい弾を生成できなくなることがあります。\n\n発生する場面\n敵弾用の本体枠が空いていても、必要な描画枠が足りない場合です。ボス戦などで使える描画枠数が制限された場合も含みます。\n\n修正後の動作\n失敗した生成の予約だけを元へ戻します。他の敵・弾の表示と、成功時の生成数や位置は変えません。",
+      "description_en": "Bug description\nA failed enemy-projectile spawn can leave a partial sprite reservation behind and prevent later projectiles from being created.\n\nWhen it happens\nSpawn an enemy projectile with a free projectile record but too few sprite parts, including the restricted pool used in some boss conditions.\n\nWith this fix\nRoll back only the failed spawn's reservations, leaving existing sprites and successful spawn counts and positions unchanged."
+    },
+    {
+      "id": "empty_projectile",
+      "title_ja": "空の投擲枠が命中する",
+      "title_en": "Empty projectile collision",
+      "bug_ids": [
+        "msx.empty_projectile"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n有効な投擲が1つあるだけで、もう片方の空枠や武器種別がまだ決まっていない予約枠まで命中判定へ混ざります。敵や物体へ誤って当たり、耐久を異常な値にすることがあります。\n\n発生する場面\n2つの投擲枠のうち、一方が有効で、もう一方が消去済みまたは武器種別未設定のときに対象と重なります。\n\n修正後の動作\n各枠の状態と武器種別を確認し、有効な剣・斧・十字架・聖水だけを判定します。聖水の有効な初期段階は除外しません。",
+      "description_en": "Bug description\nWhen one projectile is active, an empty or still-untyped reserved slot can also enter collision checks, producing false hits and abnormal health values.\n\nWhen it happens\nOverlap a target while one projectile slot is valid and the other is cleared or reserved without a weapon type.\n\nWith this fix\nValidate each slot's state and type, accepting valid swords, axes, crosses, and holy water, including holy water's valid initial phase."
+    },
+    {
+      "id": "projectile_box",
+      "title_ja": "2本目だけ当たり判定が広がる",
+      "title_en": "Second projectile collision size",
+      "bug_ids": [
+        "msx.projectile_box"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n1本目の判定で広げた当たり判定の寸法が、2本目にも引き継がれます。同じ位置・種類の武器でも、入っている枠によって敵や燭台への命中結果が変わります。\n\n発生する場面\n2本の投擲を使い分け、1本目が外れた後に2本目を敵や燭台の近くへ通します。\n\n修正後の動作\n2本目を調べる前に元の寸法へ戻します。1本目の正当な命中と、武器の種類ごとの本来の大きさは維持します。",
+      "description_en": "Bug description\nDimensions expanded for the first projectile are reused for the second, so identical projectiles at the same position can hit differently depending on their slot.\n\nWhen it happens\nUse both projectile slots so the first misses and the second passes near an enemy or candle.\n\nWith this fix\nRestore the original dimensions before checking slot two, preserving legitimate first-slot hits and each weapon's intended size."
+    },
+    {
+      "id": "crouch_fall",
+      "title_ja": "足場を失ってもしゃがんだまま浮く",
+      "title_en": "Floating crouch",
+      "bug_ids": [
+        "msx.crouch_fall"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n移動床から離れて下に支えがなくなっても、しゃがみを維持していると落下判定が行われず、その高さに浮いたままになることがあります。\n\n発生する場面\n移動床の上で下を押し続け、床が動くなどして固定床にも移動床にも支えられなくなります。\n\n修正後の動作\n特殊通路への処理を優先したうえで、まだしゃがみ状態で支えがない場合だけ通常の落下へ移します。床のある場所でのしゃがみと、進行中の攻撃は余計に消しません。",
+      "description_en": "Bug description\nA crouching player who loses support from a moving platform can remain suspended because holding Down bypasses the support check.\n\nWhen it happens\nHold Down on a moving platform until neither it nor a solid floor supports the player.\n\nWith this fix\nAfter preserving special-passage handling, enter the ordinary fall state only if still crouching without support. Grounded crouching and active attacks are not unnecessarily cleared."
+    },
+    {
+      "id": "platform_land",
+      "title_ja": "移動床への着地位置が沈む",
+      "title_en": "Moving-platform landing height",
+      "bug_ids": [
+        "msx.platform_land"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n移動床を見つけた後の縦移動と丸め処理によって、足が床の上面より8ピクセル下で着地した扱いになることがあります。次の更新で床を失い、そのまま落ちる原因になります。\n\n発生する場面\nジャンプや被弾移動から移動床へ着地し、移動後の高さが床の上面を少し行き過ぎる場合です。\n\n修正後の動作\n着地が決まった時点で、選ばれた有効な移動床の上面を基準に丸めます。固定床、通常落下、階段の着地は変えません。",
+      "description_en": "Bug description\nVertical movement followed by rounding can place a jump or injury landing eight pixels below a moving platform, causing support to be lost on the next update.\n\nWhen it happens\nLand on a moving platform during a jump or injury motion when the vertical step slightly overshoots its surface.\n\nWith this fix\nRound the landing against the selected active platform's surface, leaving solid floors, ordinary falls, and stairs unchanged."
+    },
+    {
+      "id": "platform_turn",
+      "title_ja": "折り返しで乗り手だけ進む",
+      "title_en": "Moving-platform reversal carry",
+      "bug_ids": [
+        "msx.platform_turn"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n移動床が折り返す瞬間は床だけが1回停止する一方、乗っているプレイヤーは従来方向へ1ピクセル運ばれます。端に乗っていると床から落とされることがあります。\n\n発生する場面\n移動床の端付近へ乗ったまま、床が移動周期の終わりへ達します。\n\n修正後の動作\n床が停止する更新だけ横方向の運搬を止めます。床そのものの軌道と方向転換、通常の運搬やプレイヤー自身の歩行は維持します。",
+      "description_en": "Bug description\nA platform pauses for one update at a reversal, but its rider can still move one pixel in the old direction and fall off the edge.\n\nWhen it happens\nRemain near the edge of a moving platform as it reaches the end of its travel period.\n\nWith this fix\nSkip horizontal carrying only during that stationary update, preserving the platform's path and turns, normal carrying, and the player's own walking."
+    },
+    {
+      "id": "shop_input",
+      "title_ja": "次の取引で最初の入力が消える",
+      "title_en": "Stale shop input",
+      "bug_ids": [
+        "msx.shop_input"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n前の取引を終えた入力が記録に残り、次の取引で同じボタンを最初に押したとき、新しい押下として扱われないことがあります。一度離して押し直す必要が出ます。\n\n発生する場面\n前回と同じボタンで次の取引を操作します。画面を開く前から押し続けている場合との区別も必要です。\n\n修正後の動作\n画面を開いたときの物理入力で基準を作り直し、その後の新しい押下を受け付けます。開く前からの押しっぱなしで自動的に購入することはありません。価格やYes/Noの優先順位は変えません。",
+      "description_en": "Bug description\nInput retained from a previous transaction can make the first identical press in the next shop window disappear until the button is released and pressed again.\n\nWhen it happens\nUse the same button as in the previous transaction, distinguishing a new press from a button held before opening the window.\n\nWith this fix\nRebuild the baseline from currently held inputs when the window opens, then accept new presses. Holding a button across opening does not automatically buy anything; prices and Yes/No priority stay the same."
+    },
+    {
+      "id": "boss_spawn",
+      "title_ja": "ボス生成失敗で進行が止まる",
+      "title_en": "Boss spawn retry",
+      "bug_ids": [
+        "msx.boss_spawn"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\nメデューサの本体枠や描画枠が足りなくても、生成できたものとして背景を消して先へ進むため、ボスがいないまま進行できなくなることがあります。\n\n発生する場面\nメデューサを出す瞬間に、敵の本体枠または必要な8個の描画枠が不足します。\n\n修正後の動作\n生成前に必要な空きを確認し、不足なら同じ段階で待ちます。生成後も成功を確かめてから背景を消して進めるため、空きができれば再試行できます。他のボスの進行は変えません。",
+      "description_en": "Bug description\nIf Medusa lacks an actor or enough sprite parts, the game can still erase the background and advance the boss phase, leaving the encounter stuck without a boss.\n\nWhen it happens\nReach Medusa's spawn phase without a free actor record or eight free sprite parts.\n\nWith this fix\nCheck capacity before attempting the spawn and remain in the same phase when it is insufficient. Advance and erase the background only after success, allowing retry when space becomes available without changing other bosses."
+    },
+    {
+      "id": "weapon_owner",
+      "title_ja": "古い投擲が新しい装備を消す",
+      "title_en": "Projectile equipment ownership",
+      "bug_ids": [
+        "msx.weapon_owner"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n投げた武器がまだ残っている間に別の武器を拾うと、古い投擲が画面端へ出たり壁で壊れたりした際に、現在装備している新しい武器まで失うことがあります。同じ種類を取り直した場合にも起こります。\n\n発生する場面\n武器を投げてから、それが消える前に主武器を拾い直します。発射待ちの投擲が残った場合も対象です。\n\n修正後の動作\n拾い直す前の投擲と、新しい装備の所有を区別します。古い投擲が終わっても新装備を解除しません。持ち替えなかった元の武器が本来失われる条件は維持します。",
+      "description_en": "Bug description\nA projectile that remains after collecting another weapon can remove the newly equipped weapon when it exits or breaks against a wall. Recollecting the same weapon type can also trigger it.\n\nWhen it happens\nCollect a primary weapon before an earlier projectile disappears, including an earlier reserved throw that has not launched yet.\n\nWith this fix\nDistinguish older projectiles from the newly collected equipment, so their removal cannot unequip it. Preserve the normal loss conditions when the original weapon is still owned."
+    },
+    {
+      "id": "axe_wall",
+      "title_ja": "別の投擲が当たると斧が壊れる",
+      "title_en": "Per-axe wall notification",
+      "bug_ids": [
+        "msx.axe_wall"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n壁に当たった武器の通知をすべての投擲で共有しているため、聖水などが壁に当たっただけで、離れたところを飛んでいる斧が壊れることがあります。\n\n発生する場面\n斧と別の投擲が同時にあり、その別の投擲だけが対象の壁へ当たります。\n\n修正後の動作\n実際に当たった投擲が斧の場合だけ、その斧に通知します。斧自身の正当な壁命中、アイテムの出現、他の共有通知を使う処理は維持します。",
+      "description_en": "Bug description\nA shared wall-hit notification lets another projectile, such as holy water, break an axe flying elsewhere on the screen.\n\nWhen it happens\nHave an axe and another projectile active together, then let only the other projectile hit the affected wall.\n\nWith this fix\nNotify only the actual axe involved in the collision, preserving valid axe impacts, item drops, and other users of the shared notification."
+    },
+    {
+      "id": "hurt_clip",
+      "title_ja": "被弾時に壁や低い天井へ入る",
+      "title_en": "Injury movement collision",
+      "bug_ids": [
+        "msx.hurt_clip"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n被弾時の横移動は移動前の位置でしか壁を調べず、縦移動は地形を調べずに進むため、壁の内側や低い天井へ体が入り込むことがあります。通路外へ抜けたり、地形に埋まる原因になります。\n\n発生する場面\n壁のすぐ横や低い天井の下で被弾し、その地形へ向かって押し戻される場合です。\n\n修正後の動作\n被弾時だけ横移動先でも壁を調べ、上昇は1ピクセルずつ頭の中央と左右を確認します。画面の開口部を通る移動、通常の歩行・ジャンプ・落下の動きは維持します。",
+      "description_en": "Bug description\nInjury knockback checks walls only at the old position and can move upward without checking terrain, allowing the player to enter walls or low ceilings.\n\nWhen it happens\nTake a hit beside a wall or under a low ceiling so the resulting knockback moves toward it.\n\nWith this fix\nDuring injury motion, also check the horizontal destination and sweep the head's center and sides one pixel at a time while rising. Preserve open screen exits and ordinary walking, jumping, and falling."
+    },
+    {
+      "id": "water_edge",
+      "title_ja": "聖水の消失で主武器を失う",
+      "title_en": "Holy-water edge equipment loss",
+      "bug_ids": [
+        "msx.water_edge"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n斧や十字架と聖水を持っていると、主武器を投げても持ち替えてもいないのに、聖水が画面端へ出ただけで主武器の装備が消えることがあります。\n\n発生する場面\n斧または十字架と聖水を持ち、外向きに聖水を投げて左右端へ出します。\n\n修正後の動作\n端へ出た投擲が聖水なら、その聖水だけを消します。斧や十字架自身の本来の消失と、持ち替え後の所有権保護は維持します。聖水の軌道、炎、寿命、消費ハートは変えません。",
+      "description_en": "Bug description\nWith an axe or cross equipped, holy water leaving the screen can remove the primary weapon even though it was neither thrown nor replaced.\n\nWhen it happens\nCarry holy water with an axe or cross and throw the water outward past either side of the screen.\n\nWith this fix\nRemove only the holy water at the edge, preserving normal axe/cross loss conditions and equipment-ownership protection. Water trajectories, flames, lifetime, and heart cost are unchanged."
+    },
+    {
+      "id": "bat_y",
+      "title_ja": "天井コウモリの高さ判定",
+      "title_en": "Ceiling-bat descent height",
+      "bug_ids": [
+        "msx.bat_y"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n天井から降りるコウモリが、プレイヤーとの高さの差ではなく、自身の横座標を使って降下終了を決めています。同じ高さでも左右の位置関係によって降り方が不自然に変わります。\n\n発生する場面\n天井で待機していたコウモリが近くのプレイヤーへ降下し、波形飛行へ切り替わる場面です。\n\n修正後の動作\nプレイヤーとコウモリの縦位置を比較します。接近して動き出す条件、速度、飛行アニメーション、通常の周期出現コウモリの初期状態は変えません。",
+      "description_en": "Bug description\nA descending ceiling bat compares the player's height against its own horizontal position, making the transition to wave flight depend on X instead of height.\n\nWhen it happens\nA ceiling bat descends toward a nearby player and decides when to switch into wave flight.\n\nWith this fix\nCompare the player's Y against the bat's Y, preserving approach activation, speed, animation, and the initial state of ordinary periodic bats."
+    },
+    {
+      "id": "jumper_land",
+      "title_ja": "のみ男が空中で着地する",
+      "title_en": "Carried jumper landing",
+      "bug_ids": [
+        "msx.jumper_land"
+      ],
+      "expanded_rom": true,
+      "description_ja": "バグ説明\n運搬されて出現したのみ男が、初めて落下する途中で床がないのに着地した扱いになり、空中で高さを丸めて一旦停止し、再び跳び始めます。\n\n発生する場面\n運搬されたのみ男が放たれ、初回の降下中にまだ床へ届いていない場合です。\n\n修正後の動作\n床がなければ重力の更新だけを続け、支持が得られた場合だけ既存の着地処理へ進めます。本当の着地時の丸め・停止・2更新の待機と、その後のジャンプは維持します。",
+      "description_en": "Bug description\nOn its first drop, a carried jumper can enter its landing pause without a floor, round its height in midair, and start another jump before reaching the ground.\n\nWhen it happens\nA newly released carried jumper is in its initial descent and has not yet reached a supporting floor.\n\nWith this fix\nContinue gravity updates without landing until support exists. Preserve actual landing alignment, stopping, the two-update pause, and subsequent jumps."
+    }
+  ]
+}

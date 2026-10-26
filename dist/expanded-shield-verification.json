@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "kind": "arranged Z80 shield function diagnostics",
+  "original_zero_to_255_bug_reproduced": true,
+  "rom_sha256": {
+    "original": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+    "all": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f"
+  },
+  "checks": {
+    "original": {
+      "cases": 478,
+      "function_returns": 582,
+      "shield_fix": false
+    },
+    "all": {
+      "cases": 478,
+      "function_returns": 582,
+      "shield_fix": true
+    }
+  },
+  "contracts": [
+    "remaining durability survives ordinary area entry",
+    "boss/death equipment reset removes shields and durability",
+    "both shield pickups grant 16 uses",
+    "zero durability never underflows in fixed variants",
+    "a breaking projectile shield stops blocking the rest of the same pass"
+  ],
+  "limitations": [
+    "rendering and sound calls intercepted",
+    "not an ordinary-input campaign or hardware test"
+  ]
+}

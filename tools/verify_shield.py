@@ -9,7 +9,8 @@ import argparse
 import hashlib
 import json
 
-from patches import VARIANTS, make_rom
+from patches import VARIANTS, make_rom, make_selected_rom
+from feature_catalog import CATALOG
 from verify_emulator import run, tcl_script, read_rows
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -96,6 +97,7 @@ def main():
     parser.add_argument("rom", type=Path)
     parser.add_argument("--openmsx", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=ROOT / "build/shield-verification")
+    parser.add_argument("--all-fixes", action="store_true", help="Check the expanded all-fixes build")
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -104,12 +106,17 @@ def main():
     hashes, checks = {}, {}
     base_damage = source[0x41CF]
     baseline_bug = False
-    for name, flags in {"original": (False, False, False), **VARIANTS}.items():
+    profiles = {"all": (True, True, True)} if args.all_fixes else VARIANTS
+    for name, flags in {"original": (False, False, False), **profiles}.items():
         fixed = flags[2]
-        rom = source if name == "original" else make_rom(source, fall=flags[0], edges=flags[1], shield=fixed)[0]
+        rom = (source if name == "original" else make_selected_rom(source, [fix.id for fix in CATALOG])[0]
+               if args.all_fixes else make_rom(source, fall=flags[0], edges=flags[1], shield=fixed)[0])
         path, output = out / f"{name}.rom", out / f"{name}.tsv"
         path.write_bytes(rom)
-        run(args.openmsx.resolve(), path, script_for(cases, output), out, name)
+        script = script_for(cases, output)
+        if args.all_fixes:
+            script = script.replace("0xf200", "0xf0a0").replace("debug write memory 0xf0d0 0", "debug write memory 0xf0d0 160").replace("0xf0d1 0xf2", "0xf0d1 0xf0")
+        run(args.openmsx.resolve(), path, script, out, name)
         rows, _ = read_rows(output, cases)
         extra = {}
         for line in output.read_text().splitlines():

@@ -43,10 +43,10 @@ class SelectorChecks(unittest.TestCase):
     def test_all_existing_selections_and_input_order(self):
         for name, flags in VARIANTS.items():
             ids = legacy_selection(*flags)
-            expected = (ROOT / "dist" / f"{name}.ips").read_bytes()
+            expected = self.manifest[name]["ips_sha256"]
             for order in permutations(ids):
                 artifact = build_selection(self.source, order)
-                self.assertEqual(artifact.patch, expected, (name, order))
+                self.assertEqual(hashlib.sha256(artifact.patch).hexdigest(), expected, (name, order))
                 self.assertEqual(len(apply_ips(self.source, artifact.patch)), OUTPUT_SIZE)
                 self.assertEqual(artifact.report["rom_sha256"], self.manifest[name]["rom_sha256"])
 
@@ -54,7 +54,7 @@ class SelectorChecks(unittest.TestCase):
         for name, flags in VARIANTS.items():
             target = self.folder / (name + ".ips")
             self.cli(self.rom_path, "--enable", *legacy_selection(*flags), "--out", target)
-            self.assertEqual(target.read_bytes(), (ROOT / "dist" / (name + ".ips")).read_bytes())
+            self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(), self.manifest[name]["ips_sha256"])
             record = json.loads(Path(str(target) + ".json").read_text(encoding="utf-8"))
             self.assertEqual(record["rom_sha256"], self.manifest[name]["rom_sha256"])
 
@@ -64,7 +64,30 @@ class SelectorChecks(unittest.TestCase):
         self.cli(self.rom_path, "--all", "--out", first, "--save-config", config)
         self.cli(self.rom_path, "--config", config, "--out", second)
         self.assertEqual(first.read_bytes(), second.read_bytes())
-        self.assertEqual(first.read_bytes(), (ROOT / "dist/combined_shield.ips").read_bytes())
+        record = json.loads(Path(str(first) + ".json").read_text(encoding="utf-8"))
+        report = ROOT / "build/bug-verification/report.json"
+        if not report.exists():
+            report = ROOT / "dist/bug-verification.json"
+        expected = json.loads(report.read_text(encoding="utf-8"))["profiles"]["all"]
+        self.assertEqual(record["rom_sha256"], expected["rom_sha256"])
+        patched = apply_ips(self.source, first.read_bytes())
+        self.assertEqual(len(patched), 262144)
+        self.assertEqual(patched[0x8000:0x20000], self.source[0x8000:0x20000])
+
+    def test_saved_legacy_selection_does_not_add_new_fixes(self):
+        target = self.folder / "legacy.ips"
+        self.cli(self.rom_path, "--config", ROOT / "examples/selection.json", "--out", target)
+        self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(), self.manifest["combined_shield"]["ips_sha256"])
+        record = json.loads(Path(str(target) + ".json").read_text(encoding="utf-8"))
+        self.assertEqual(record["selected_fixes"], ["fall_attack", "screen_edges", "shield_fix"])
+        self.assertEqual(record["rom_bytes"], 131072)
+
+    def test_build_records_do_not_embed_rom_data(self):
+        for ids in (["fall_attack", "screen_edges", "shield_fix"], [fix.id for fix in CATALOG]):
+            record = build_selection(self.source, ids).report
+            for change in record["changes"]:
+                self.assertNotIn("before", change)
+                self.assertNotIn("after", change)
 
     def test_cli_list_does_not_need_rom(self):
         for language in ("ja", "en"):
@@ -99,7 +122,7 @@ class SelectorChecks(unittest.TestCase):
         self.cli(self.rom_path, "--enable", "shield_fix", "--out", target, success=False)
         self.assertEqual(before, {path: path.read_bytes() for path in self.folder.iterdir()})
         self.cli(self.rom_path, "--enable", "shield_fix", "--out", target, "--force")
-        self.assertEqual(target.read_bytes(), (ROOT / "dist/shield_fix.ips").read_bytes())
+        self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(), self.manifest["shield_fix"]["ips_sha256"])
 
     def test_input_cannot_be_output_even_with_force(self):
         source = self.folder / "source.ips"
@@ -110,7 +133,7 @@ class SelectorChecks(unittest.TestCase):
 
     def test_source_revision_guards(self):
         for source in (self.source[:-1], bytes(OUTPUT_SIZE),
-                       apply_ips(self.source, (ROOT / "dist/combined_shield.ips").read_bytes())):
+                       apply_ips(self.source, build_selection(self.source, ["fall_attack", "screen_edges", "shield_fix"]).patch)):
             with self.assertRaisesRegex(ValueError, "Unsupported input ROM"):
                 build_selection(source, ["shield_fix"])
 
@@ -210,7 +233,7 @@ class WindowChecks(SelectorChecks):
         self.root.update_idletasks()
 
     def test_window_selection_and_both_languages(self):
-        self.assertEqual(len(self.window.selected_ids()), 3)
+        self.assertEqual(len(self.window.selected_ids()), len(CATALOG))
         self.window.clear.invoke()
         self.assertFalse(self.window.selected_ids())
         self.assertTrue(self.window.generate.instate(["disabled"]))
@@ -235,7 +258,7 @@ class WindowChecks(SelectorChecks):
              patch("selector_gui.messagebox.showinfo") as success:
             self.window.generate.invoke()
         self.assertTrue(success.called)
-        self.assertEqual(output.read_bytes(), (ROOT / "dist/fall_attack_shield.ips").read_bytes())
+        self.assertEqual(hashlib.sha256(output.read_bytes()).hexdigest(), self.manifest["fall_attack_shield"]["ips_sha256"])
         wrong = self.folder / "wrong.rom"
         wrong.write_bytes(bytes(OUTPUT_SIZE))
         self.window.rom.set(str(wrong))
@@ -326,6 +349,7 @@ def main():
     report = dict(status="passed" if result.wasSuccessful() else "failed", tests=result.testsRun,
                   gui_tested=not args.skip_gui, source_sha256=SOURCE_SHA256,
                   registered_fixes=[fix.id for fix in CATALOG],
+                  all_fixes_rom_sha256=build_selection(source, [fix.id for fix in CATALOG]).report["rom_sha256"],
                   matches_published_patches={name: data["rom_sha256"] for name, data in SelectorChecks.manifest.items()},
                   synthetic_inline_extension_fixes=20)
     args.out.mkdir(parents=True, exist_ok=True)

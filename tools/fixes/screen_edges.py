@@ -5,6 +5,7 @@ from fixes import Explanation, Fix
 
 
 def emit_helpers(c):
+    edge = getattr(c, "weapon_edge_offset", 15)
     c.labels["spawn_original"] = 0x5F1D
     c.label("main_actor")
     c.emit("E5 DD E5 E1 7C E1 FE D7 C9", "compare IX record page with $D7, preserving HL")
@@ -190,13 +191,13 @@ def emit_helpers(c):
     c.label("weapon_move_left")
     c.emit("DD 86 03 D8", "add a,(ix+3) / ret c")
     c.label("weapon_wrapped")
-    c.emit("DD 36 0F 01 C9", "ld (ix+15),1 / ret")
+    c.emit(f"DD 36 {edge:02X} 01 C9", "set sword X-wrap marker / ret")
     c.label("weapon_move_original")
     c.emit("DD 7E 05 DD 86 03 C9", "ld a,(ix+5) / add a,(ix+3) / ret")
     c.label("weapon_cull")
     c.emit("DD 7E 01 FE 02", "ld a,(ix+1) / cp 2")
     c.jr("weapon_cull_original", "nz")
-    c.emit("DD 7E 0F B7 C8 DD 7E 05 DD CB 03 7E", "ld a,(ix+15) / or a / ret z / ld a,(ix+5) / bit 7,(ix+3)")
+    c.emit(f"DD 7E {edge:02X} B7 C8 DD 7E 05 DD CB 03 7E", "read sword X-wrap marker / or a / ret z / ld a,(ix+5) / bit 7,(ix+3)")
     c.jr("weapon_cull_left", "nz")
     c.emit("FE 08 D8", "cp 8 / ret c")
     c.jp(0x74E9)
@@ -208,7 +209,7 @@ def emit_helpers(c):
     c.jp(0x74DA)
     c.label("weapon_draw")
     c.call(0x7535)
-    c.emit("DD 7E 01 FE 02 C0 DD 7E 0F B7", "ld a,(ix+1) / cp 2 / ret nz / ld a,(ix+15) / or a")
+    c.emit(f"DD 7E 01 FE 02 C0 DD 7E {edge:02X} B7", "ld a,(ix+1) / cp 2 / ret nz / read sword X-wrap marker / or a")
     c.jr("weapon_draw_screen", "z")
     c.emit("DD CB 03 7E C8", "bit 7,(ix+3) / ret z")
     c.jr("weapon_early")
@@ -229,7 +230,7 @@ def emit_helpers(c):
     c.emit("3E 06 85 6F", "ld a,6 / add a,l / ld l,a")
     c.emit("FD 7E 01 FE 02", "ld a,(iy+1) / cp 2")
     c.jr("weapon_collision_original", "nz")
-    c.emit("FD 7E 0F B7 C0", "ld a,(iy+15) / or a / ret nz ; carry clear")
+    c.emit(f"FD 7E {edge:02X} B7 C0", "read sword X-wrap marker / or a / ret nz ; carry clear")
     c.label("weapon_collision_original")
     c.jp(0x8504)
 
@@ -248,7 +249,8 @@ def apply(edit, hook, c):
     hook(0x34C7, "DD 86 03", "weapon_x", "Track sword X overflow")
     hook(0x34D7, "DD 7E 05", "weapon_cull", "Keep swords until all pixels leave the screen", 0xC3)
     hook(0x32CB, "C3 35 75", "weapon_draw", "Clip sword sprites; preserve other weapon drawing", 0xC3)
-    hook(0x4500, "3E 06 85", "weapon_collision", "Reject sword collisions after X wraps", 0xC3)
+    if "empty_projectile" not in getattr(c, "enabled", ()):
+        hook(0x4500, "3E 06 85", "weapon_collision", "Reject sword collisions after X wraps", 0xC3)
 
 
 FIX = Fix(

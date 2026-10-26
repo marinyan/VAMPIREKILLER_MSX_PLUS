@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "source_sha256": "99eabaaeb2b6c02220e131043d5a6401d0d8c5f413d89204547adcc04d65e7e2",
+  "rom_sha256": "748510008a9f8d42279649509e96963c482d4baf0a4c3a984c843c3a8972284f",
+  "rom_bytes": 262144,
+  "selected_fixes": [
+    "fall_attack",
+    "screen_edges",
+    "shield_fix",
+    "stairs",
+    "trap_contact",
+    "trap_attack",
+    "patrol_timer",
+    "mummy_start",
+    "reform_hp",
+    "stun_hp",
+    "hourglass",
+    "actor_alloc",
+    "projectile_alloc",
+    "empty_projectile",
+    "projectile_box",
+    "crouch_fall",
+    "platform_land",
+    "platform_turn",
+    "shop_input",
+    "boss_spawn",
+    "weapon_owner",
+    "axe_wall",
+    "hurt_clip",
+    "water_edge",
+    "bat_y",
+    "jumper_land"
+  ],
+  "original_asset_bank_bytes_unchanged": 98304,
+  "asset_banks_unchanged": true,
+  "asset_recompression": false,
+  "poses_equal": 168,
+  "item_candle_vram_bytes_equal": 131072,
+  "resident_bytes": 968,
+  "extension_code_bytes": 873,
+  "extension_free_bytes": 6351,
+  "smoke": {
+    "all": {
+      "samples": 82,
+      "gameplay_samples": 78,
+      "visited_area_rooms": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "resident_code_unchanged": true,
+      "scope": "power-on and ordinary keyboard input, 63.5 emulated seconds"
+    }
+  },
+  "limitations": [
+    "function diagnostics and opening-section input test",
+    "not a full campaign or hardware test"
+  ]
+}

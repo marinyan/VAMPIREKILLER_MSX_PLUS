@@ -61,7 +61,8 @@ def main(argv=None):
     print("Selected: " + ", ".join(artifact.report["selected_fixes"]))
     print(f"IPS: {args.out} ({len(artifact.patch)} bytes)")
     print(f"ROM: {artifact.report['rom_bytes']} bytes; SHA-256 {artifact.report['rom_sha256']}")
-    print(f"Bank 6 free: {artifact.report['bank6_free_bytes']} bytes")
+    free = artifact.report.get("extension_free_bytes", artifact.report["bank6_free_bytes"])
+    print(f"Code storage free: {free} bytes")
     print(f"Build record: {args.out}.json")
     return 0
 

@@ -17,7 +17,7 @@ TEXT = {
         "details": "詳細…", "close": "閉じる",
         "all": "すべて選択", "none": "選択を解除", "load": "選択を読込…",
         "save": "選択を保存…", "generate": "IPSを生成…",
-        "count": "{count}項目を選択中 · 出力ROMは1Mbit（128 KiB）",
+        "count": "{count}項目を選択中 · 出力ROMは{size}",
         "empty": "修正を1つ以上選んでください。",
         "hint": "生成したIPSを、無改変ROMのコピーに1つだけ適用してください。",
         "error": "生成できません", "source_missing": "原ROMを指定してください。",
@@ -26,7 +26,7 @@ TEXT = {
         "overwrite_body": "次のファイルを置き換えますか？\n\n{files}",
         "saved": "選択内容を保存しました。",
         "success": "IPSを生成しました",
-        "result": "{names}\n\nIPS: {path}\n適用後: {size:,}バイト（1Mbit）\nROM内の空き: {free}バイト\n\n選択内容とハッシュは {record} に保存しました。",
+        "result": "{names}\n\nIPS: {path}\n適用後: {size:,}バイト\n追加コード領域の空き: {free}バイト\n\n選択内容とハッシュは {record} に保存しました。",
     },
     "en": {
         "heading": "Choose fixes and generate one IPS",
@@ -36,7 +36,7 @@ TEXT = {
         "details": "Details…", "close": "Close",
         "all": "Select all", "none": "Clear", "load": "Load selection…",
         "save": "Save selection…", "generate": "Generate IPS…",
-        "count": "{count} fixes selected · Output ROM: 1 Mbit (128 KiB)",
+        "count": "{count} items selected · Output ROM: {size}",
         "empty": "Select at least one fix.",
         "hint": "Apply the generated IPS once to a copy of the unmodified ROM.",
         "error": "Unable to generate", "source_missing": "Choose a source ROM first.",
@@ -45,7 +45,7 @@ TEXT = {
         "overwrite_body": "Replace these existing files?\n\n{files}",
         "saved": "Selection saved.",
         "success": "IPS generated",
-        "result": "{names}\n\nIPS: {path}\nPatched ROM: {size:,} bytes (1 Mbit)\nFree ROM space: {free} bytes\n\nSelection and hashes saved in {record}.",
+        "result": "{names}\n\nIPS: {path}\nPatched ROM: {size:,} bytes\nFree code storage: {free} bytes\n\nSelection and hashes saved in {record}.",
     },
 }
 
@@ -207,7 +207,9 @@ class SelectorWindow:
             chosen = resolve_selection(ids)
             for fix in chosen:
                 self.variables[fix.id].set(True)
-            self.status.set(self.tr("count", count=len(chosen)))
+            expanded = any(fix.extended_helpers for fix in chosen)
+            size = "2 Mbit (256 KiB)" if expanded else "1 Mbit (128 KiB)"
+            self.status.set(self.tr("count", count=len(chosen), size=size))
             self.generate.state(["!disabled"])
             self.save.state(["!disabled"])
         except ValueError as error:
@@ -265,7 +267,7 @@ class SelectorWindow:
             self.status.set(self.tr("success"))
             names = ", ".join(fix.title(self.language) for fix in resolve_selection(report["selected_fixes"]))
             messagebox.showinfo(self.tr("success"), self.tr("result", names=names, path=path,
-                                size=report["rom_bytes"], free=report["bank6_free_bytes"], record=Path(path).name + ".json"),
+                                size=report["rom_bytes"], free=report.get("extension_free_bytes", report["bank6_free_bytes"]), record=Path(path).name + ".json"),
                                 parent=self.root)
         except (OSError, ValueError) as error:
             messagebox.showerror(self.tr("error"), str(error), parent=self.root)

@@ -46,6 +46,7 @@ FIX = Fix(
     description_ja='足場から落下している間も、鞭と特殊武器を使用できます。',
     description_en='Use the whip and special weapons while falling off a ledge.',
     emit_helpers=emit_helpers, apply=apply,
+    bug_ids=("msx.fall_attack",),
     explanation=Explanation(
         symptom_ja=("足場から歩いて落ちると、地上で始めた鞭などの攻撃が着地するまで途中で止まります。"
                     "また、落下中に特殊武器を使おうとしても受け付けられません。ジャンプ中にはできる攻撃が、"

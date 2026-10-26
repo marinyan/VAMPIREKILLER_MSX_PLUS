@@ -39,6 +39,8 @@ class Fix:
     conflicts: tuple[str, ...] = ()
     explanation: Explanation | None = None
     behavior_change: bool = False
+    extended_helpers: bool = False
+    bug_ids: tuple[str, ...] = ()
 
     def title(self, language):
         return self.title_ja if language == "ja" else self.title_en

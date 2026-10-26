@@ -4,9 +4,36 @@ import re
 from fixes.fall_attack import FIX as FALL_ATTACK
 from fixes.screen_edges import FIX as SCREEN_EDGES
 from fixes.shield_fix import FIX as SHIELD_FIX
+from fixes.stairs import FIX as STAIRS
+from fixes.trap_contact import FIX as TRAP_CONTACT
+from fixes.trap_attack import FIX as TRAP_ATTACK
+from fixes.patrol_timer import FIX as PATROL_TIMER
+from fixes.mummy_start import FIX as MUMMY_START
+from fixes.reform_hp import FIX as REFORM_HP
+from fixes.stun_hp import FIX as STUN_HP
+from fixes.hourglass import FIX as HOURGLASS
+from fixes.actor_alloc import FIX as ACTOR_ALLOC
+from fixes.projectile_alloc import FIX as PROJECTILE_ALLOC
+from fixes.empty_projectile import FIX as EMPTY_PROJECTILE
+from fixes.projectile_box import FIX as PROJECTILE_BOX
+from fixes.crouch_fall import FIX as CROUCH_FALL
+from fixes.platform_land import FIX as PLATFORM_LAND
+from fixes.platform_turn import FIX as PLATFORM_TURN
+from fixes.shop_input import FIX as SHOP_INPUT
+from fixes.boss_spawn import FIX as BOSS_SPAWN
+from fixes.weapon_owner import FIX as WEAPON_OWNER
+from fixes.axe_wall import FIX as AXE_WALL
+from fixes.hurt_clip import FIX as HURT_CLIP
+from fixes.water_edge import FIX as WATER_EDGE
+from fixes.bat_y import FIX as BAT_Y
+from fixes.jumper_land import FIX as JUMPER_LAND
 
 # Add a fix module above and register it here. Order is stable for ROM layout.
-CATALOG = (FALL_ATTACK, SCREEN_EDGES, SHIELD_FIX)
+ADDITIONAL_FIXES = (STAIRS, TRAP_CONTACT, TRAP_ATTACK, PATROL_TIMER, MUMMY_START, REFORM_HP, STUN_HP, HOURGLASS,
+                    ACTOR_ALLOC, PROJECTILE_ALLOC, EMPTY_PROJECTILE, PROJECTILE_BOX, CROUCH_FALL, PLATFORM_LAND,
+                    PLATFORM_TURN, SHOP_INPUT, BOSS_SPAWN, WEAPON_OWNER, AXE_WALL, HURT_CLIP,
+                    WATER_EDGE, BAT_Y, JUMPER_LAND)
+CATALOG = (FALL_ATTACK, SCREEN_EDGES, SHIELD_FIX, *ADDITIONAL_FIXES)
 
 
 def resolve_selection(feature_ids, catalog=CATALOG):

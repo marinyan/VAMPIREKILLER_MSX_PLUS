@@ -44,6 +44,8 @@ def build_selection(source, feature_ids):
     patch = ips_patch(source, target)
     if apply_ips(source, patch) != target:
         raise ValueError("Generated IPS did not reproduce the selected ROM")
+    info["changes"] = [{key: value for key, value in change.items() if key not in ("before", "after")}
+                       for change in info["changes"]]
     return Artifact(patch, dict(format="vampire-killer-ips-build-v1", selection=config,
                                 ips_sha256=hashlib.sha256(patch).hexdigest(),
                                 ips_bytes=len(patch), **info))

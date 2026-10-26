@@ -1,30 +1,17 @@
-# Adding fixes
+# Adding fixes and packaging
 
 [日本語](adding-fixes.md) | [English](adding-fixes.en.md)
 
-The selector links the requested fixes and generates one IPS from the original ROM. It neither stacks IPS files nor enumerates all possible combinations.
+This project generates a selected IPS from the user's own original ROM. Fixes are managed independently, without enumerating combinations. The distribution contains no prebuilt IPS or ROM.
 
-## Source layout
+## Registration
 
-| File | Purpose |
-|---|---|
-| `tools/fixes/__init__.py` | `Fix` metadata, dependency/conflict declarations, and callbacks |
-| `tools/fixes/*.py` | Each fix's resident helpers and ROM edits |
-| `tools/feature_catalog.py` | Stable registration order, dependency resolution, selection validation |
-| `tools/patches.py` | Z80 linking, labels, placement, original-byte and edit-range checks |
-| `tools/selection_build.py` | Single-IPS builds, build records, selection JSON, output handling |
-| `tools/patch_selector.py` / `tools/selector_gui.py` | CLI and GUI; both read their item list from the catalog |
+1. Create a module under `tools/fixes/`.
+2. Give its `Fix` a stable ID and Japanese/English titles, summaries, and bug explanations. IDs use lowercase letters, digits, and underscores, beginning with a letter.
+3. Register it in `CATALOG` in `tools/feature_catalog.py`. The CLI and GUI discover it automatically.
+4. Check the original symptom, corrected behavior, disabled controls, and relevant interactions with `tools/verify_bugs.py` or another behavioral diagnostic.
 
-## Register an item
-
-1. Create a module in `tools/fixes/`. `shield_fix.py` is a short working example.
-2. Define a `Fix` with a stable ID, Japanese/English titles, summaries, and bug explanations. IDs use lowercase letters, digits, and underscores, beginning with a letter.
-3. Import its `FIX` in `tools/feature_catalog.py` and append it to `CATALOG`, retaining the existing order. The CLI and GUI discover the entry automatically.
-4. Add behavioral checks for the fix and relevant interactions; check placement and actual game behavior.
-
-The number of items is not fixed. Keep existing IDs stable as new fixes are added. Saved selections refer to IDs, so changes to display order or explanations do not change the selected fixes. New items are not automatically added to previously saved selections.
-
-A module has the following shape. Replace the comments with helpers and edits verified against the original ROM.
+Use `extended_helpers=True` for new fixes. `stairs.py` is a working example. `bug_descriptions.py` holds shared descriptions and offers the `bug_fix` factory.
 
 ```python
 from fixes import Explanation, Fix
@@ -33,62 +20,58 @@ from fixes import Explanation, Fix
 def emit_helpers(c):
     # c.label("your_fix_entry")
     # c.emit("...", "corresponding Z80 instructions")
-    # c.call("shared_label") / c.jp(...) / c.jr(...)
     pass
 
 
 def apply(edit, hook, c):
-    # edit(offset, expected_bytes, replacement_bytes, "Reason for the edit")
-    # hook(offset, expected_bytes, "your_fix_entry", "Reason for the hook")
+    # hook(offset, expected_bytes, "your_fix_entry", "Reason")
+    # edit(offset, expected_bytes, replacement_bytes, "Reason")
     pass
 
 
 FIX = Fix(
-    id="your_fix",
-    title_ja="修正名", title_en="Fix title",
-    description_ja="挙動の説明", description_en="Behavior description",
+    id="your_fix", title_ja="修正名", title_en="Fix title",
+    description_ja="一覧用の要約", description_en="List summary",
     explanation=Explanation(
-        symptom_ja="何が起きてプレイにどう影響するか", symptom_en="The symptom and its effect on play",
-        trigger_ja="どの場面・操作・装備で発生するか", trigger_en="The situation, inputs, or equipment that trigger it",
-        correction_ja="有効にするとどう変わるか", correction_en="How enabling this fix changes the behavior",
-        notes_ja="対象や維持する動作など", notes_en="Scope and behavior that stays the same",
+        symptom_ja="現象とプレイへの影響", symptom_en="Symptom and impact",
+        trigger_ja="発生する場面・操作・装備", trigger_en="Triggering situation, inputs, or equipment",
+        correction_ja="修正後の動作", correction_en="Corrected behavior",
+        notes_ja="補足", notes_en="Notes",
     ),
+    extended_helpers=True, bug_ids=("msx.your_fix",),
     emit_helpers=emit_helpers, apply=apply,
     requires=(), conflicts=(),
 )
 ```
 
-Omit `emit_helpers` if the fix only edits existing instructions. Builds containing only inline fixes do not emit zero-length RAM transfers. Use labels that do not collide with other modules.
+Explain the symptom, trigger, and corrected behavior in both languages. If an item groups bugs, explain each and list their `bug_ids`. Use `behavior_change=True` to identify behavior improvements. Hover tips, Details, and CLI `--list` share the full text.
 
-`description_ja/en` supplies the brief list summary. `Explanation` must describe the symptom, its trigger, and the corrected behavior in both languages, with optional notes. Explain individual bugs separately when an item groups several fixes. Hover tips, Details, and CLI `--list` all use this full text. Set `behavior_change=True` for a behavior improvement that should not be labeled as a bug fix. `verify_selector.py` checks that registered items have complete explanations in both languages.
+The item count is not fixed. Keep IDs stable so saved selections survive ordering and wording changes. New items are not automatically added to older selections.
 
-`edit` takes a file offset, equal-length original/replacement bytes, and a reason. Byte arguments accept `bytes` or hexadecimal strings. `hook` normally emits a three-byte CALL; pass `0xC3` as its final argument for JP. Label addresses are resolved after linking.
+## Dependencies, conflicts, and edit checks
 
-## Dependencies and conflicts
+`requires=("other_fix",)` includes and builds dependencies first. A `conflicts=("other_fix",)` declaration on either side rejects the pair. Unknown IDs, duplicate registration, missing references, and cycles are errors.
 
-`requires=("other_fix",)` automatically includes the dependency and links its helpers and edits first. The GUI reflects these dependencies in its checkboxes. Selection order does not affect the generated IPS.
+`edit` takes a file offset, equal-length original/replacement bytes, and a reason. Bytes may be `bytes` or hexadecimal strings. `hook` normally emits a three-byte CALL; pass `0xC3` as the last argument for JP. Original bytes and overlapping ranges are always checked.
 
-Declare incompatible items with `conflicts=("other_fix",)`. A declaration on either side rejects the pair. Unknown IDs, duplicate registrations, missing references, and dependency cycles are also errors.
+Do not overwrite the same hook with competing edits. Consolidate shared logic and use `c.enabled` to inspect selected IDs. Existing shared logic coordinates projectile reservations, equipment ownership, axe wall notifications, and sword edge markers.
 
-Overlapping ROM edits are rejected, even if they write identical bytes. To support both fixes at the same hook, consolidate the hook in the core or a shared module with appropriate dependencies.
+## Expanded layout
 
-## Capacity and placement
+`tools/expanded_rom.py` builds the 2 Mbit output. Original asset banks 4 through 15 stay unchanged. Physical 8 KiB bank 16 holds correction code and the storage copy of resident helpers, without duplicating or recompressing graphics, music, or stages.
 
-Output remains 1 Mbit. Shared asset repacking and decompression are included once. Resident helpers currently use `$E618–E7FF` and `$F100–F1C8`. The screen-edge module switches to `$F100` partway through; later modules continue in that segment.
+The original three items use RAM `$E618–E7FF` and `$F100–F1C8`. Entry adapters and the bank-return bridge use `$F1C9–F37F`. They load at startup and preserve registers, return values, stack balance, and the caller's interrupt-enable state around bank changes. Storage-bank, reserved-RAM, and startup-loader overflow stop generation.
 
-The builder checks bank 6 storage, reserved RAM bounds and overlaps, and startup-loader size. If a new helper does not fit, reduce the implementation or investigate and revise the placement design. The tool does not expand the ROM automatically. The `.ips.json` record exposes `bank6_free_bytes`, `ram_chunks`, and the responsible module for each edit in `changes[].owner`.
+An expanded `emit_helpers(c)` emits labels in CPU window `$8000–9FFF`. `c.call("label")` calls within the extension; `c.call(0x1234)` selects original bank 2 for the call. Numeric `c.jp` is implemented as an original call followed by a return. Repeatedly returning to an already hooked original loop can accumulate nested calls; move the loop into the helper and return at its success/failure boundary instead.
 
-## Verification and distribution
+Direct reads from `$8000–9FFF` inside extension code read the extension, not original data. Delegate such reads to a routine running in the original bank. Do not manually use `org` in new extension emitters.
 
-```powershell
-python tools/patch_selector.py --list
-python tools/patch_selector.py path/to/original.rom --enable your_fix --out build/your-fix.ips
-python tools/patch_selector.py path/to/original.rom --all --out build/all-fixes.ips
-python tools/verify_selector.py path/to/original.rom
-```
+RAM bounds were chosen against original usage and the [MSX2 Technical Handbook's cartridge work-area description](https://konamiman.github.io/MSX2-Technical-Handbook/md/Chapter5b.html). Physical hardware has not been tested.
 
-`verify_selector.py` checks the current three fixes against all seven published patches, CLI/Tcl-Tk workflows, saved selections, dependencies, conflicts, and capacity limits. It also registers twenty synthetic inline fixes to exercise extension without combination tables. These fixtures are integration tests, not twenty implemented game fixes.
+## Compatibility and distribution
 
-For each new fix, add behavioral diagnostics and check relevant interactions and an all-fixes build. Do not claim every combination has been tested. `VARIANTS` and `build_patches.py` retain the seven existing releases for reproducibility; new fixes do not require new combinations there.
+Selections containing only the original three items reproduce the earlier 1 Mbit outputs. Only this mode uses the graphics repacking in `compact_assets.py`, with data read from the user's ROM. `VARIANTS` retains the seven earlier selections for hash checks; new fixes do not require new combinations there.
 
-`python tools/package_patches.py` packages nested fix modules, both languages' documentation, and selector verification alongside the existing distribution. ROMs and emulator snapshots are excluded.
+`build_patches.py` defaults to local `build/patches/` and `build/`. `dist/manifest.json` contains compatibility hashes and verification metadata. Build records omit original data bytes.
+
+Run function diagnostics, expanded graphics/opening-input checks, shield diagnostics, and selector checks before `python tools/package_patches.py`. Packaging refuses prebuilt IPS files and includes sources, documentation, and verification records. Distinguish original reproduction, corrected function checks, opening input, and full-campaign validation by their actual scope.

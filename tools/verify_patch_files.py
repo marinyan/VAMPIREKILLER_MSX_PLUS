@@ -18,8 +18,8 @@ def main():
     manifest = json.loads((args.dist / "manifest.json").read_text(encoding="utf-8"))
     for name, (fall, edges, shield) in VARIANTS.items():
         target, info, _, _ = make_rom(source, fall=fall, edges=edges, shield=shield)
-        patch = (args.dist / f"{name}.ips").read_bytes()
-        assert patch == ips_patch(source, target), name
+        patch = ips_patch(source, target)
+        assert hashlib.sha256(patch).hexdigest() == manifest["variants"][name]["ips_sha256"], name
         assert apply_ips(source, patch) == target, name
         assert manifest["variants"][name]["rom_sha256"] == info["rom_sha256"], name
         touched = set()

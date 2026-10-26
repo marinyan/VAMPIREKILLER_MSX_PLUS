@@ -30,6 +30,7 @@ FIX = Fix(
     description_ja='通常のステージ移動で耐久を持ち越し、ボス後の解除と耐久切れを正常に処理します。',
     description_en='Keep durability across ordinary area changes; correct exhaustion and preserve equipment removal after bosses.',
     emit_helpers=emit_helpers, apply=apply,
+    bug_ids=("msx.shield_area", "msx.shield_break"),
     explanation=Explanation(
         symptom_ja=("この項目は盾に関する2つの不具合をまとめて直します。\n"
                     "① 盾を持ったまま通常のステージを移動すると、装備は残るのに残り耐久だけが0になります。"

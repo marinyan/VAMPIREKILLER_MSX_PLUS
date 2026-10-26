@@ -70,7 +70,7 @@ def apply_ips(source, patch):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("rom", type=Path, help="Unmodified 128 KiB cartridge dump matching the supported SHA-256")
-    parser.add_argument("--out", type=Path, default=ROOT / "dist")
+    parser.add_argument("--out", type=Path, default=ROOT / "build/patches")
     parser.add_argument("--rom-out", type=Path, default=ROOT / "build")
     args = parser.parse_args()
     source = args.rom.read_bytes()
@@ -88,6 +88,8 @@ def main():
         (args.rom_out / f"{name}.asm").write_text("\n".join(loader.lines + code.lines) + "\n", encoding="utf-8")
         info["ips_sha256"] = hashlib.sha256(patch).hexdigest()
         info["ips_bytes"] = len(patch)
+        info["changes"] = [{key: value for key, value in change.items() if key not in ("before", "after")}
+                           for change in info["changes"]]
         manifest["variants"][name] = info
         print(f"{name}: IPS {len(patch)} B; ROM {len(target)} B; helpers {info['helper_bytes']} B")
     (args.out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

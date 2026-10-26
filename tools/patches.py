@@ -142,6 +142,9 @@ def make_selected_rom(source, feature_ids, *, catalog=CATALOG):
     if len(source) != OUTPUT_SIZE or hashlib.sha256(source).hexdigest() != SOURCE_SHA256:
         raise ValueError("Unsupported input ROM. Expected 128 KiB SHA-256 " + SOURCE_SHA256)
     selected = resolve_selection(feature_ids, catalog)
+    if any(fix.extended_helpers for fix in selected):
+        from expanded_rom import make_expanded
+        return make_expanded(source, selected, catalog)
     c = selected_helpers(selected)
     payload = c.finish()
     table, poses, atlas, asset_info = repack(source)
