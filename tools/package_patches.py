@@ -73,7 +73,7 @@ def main():
     route_path = ROOT / "dist/expanded-route-verification.json"
     route_inputs = ROOT / "dist/expanded-route-inputs.json.gz"
     route = json.loads(route_path.read_text(encoding="utf-8"))
-    if (route["status"] != "passed" or not route["replay_matches_source"]
+    if (route["status"] != "passed" or not route["completed_campaign"] or not route["replay_matches_source"]
             or route["rom_sha256"] != all_build["rom_sha256"]
             or route["selected_fixes"] != expected_ids
             or not route["independent_work_RAM_match"]

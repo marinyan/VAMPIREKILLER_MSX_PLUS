@@ -97,9 +97,9 @@ The seven selections using only the original three items reproduce their previou
 
 The earlier full-campaign run applies to the 1 Mbit falling-attack + screen-edge selection. It visited all 19 areas and 139 screens, defeated six bosses including both final forms, observed 41 ending entries and the next loop, and matched all 56,792 updates in two independent replays. The [campaign report](dist/campaign-verification.json) and [ROM-free input archive](dist/campaign-inputs.json.gz) are retained.
 
-A separate ordinary-keyboard route reached 34 screens across areas 0–6 and defeated the first boss. The controller stopped after lethal damage in area 6. Both a recording replay and a fresh power-on input replay matched the 9,329 sampled updates and 94 work-RAM samples. The [partial-route record](dist/expanded-route-verification.json) and [ROM-free inputs](dist/expanded-route-inputs.json.gz) are included. Matching these samples does not establish a full clear or replay of the final lethal update.
+The 2 Mbit build with all 29 options also completed all 19 areas, 137 screens, six bosses and both final forms, all 41 ending messages, and the active start and movement of the next loop. A recording replay and a second replay from a fresh power-on seed matched all 59,346 observations and 594 work-RAM samples. The route includes two ordinary deaths and life recoveries, with no midgame restores or game RAM, PC, or ROM writes. The [complete-campaign record](dist/expanded-route-verification.json), [ROM-free input archive](dist/expanded-route-inputs.json.gz), and [frozen 29-option selection](examples/verified-campaign-29.json) are included.
 
-**The new all-items build has not been tested through a full campaign or on physical hardware.** Function diagnostics and opening-section input checks do not establish a full clear.
+This covers the first clear and next-loop start. It does not establish absence of every bug, a complete second loop, or operation on physical hardware.
 
 ## Repeating checks and adding fixes
 
@@ -109,7 +109,7 @@ python tools/verify_bugs.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_expanded.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_shield.py path/to/original.rom --openmsx path/to/openmsx.exe --all-fixes --out build/expanded-shield-verification
 python tools/verify_selector.py path/to/original.rom
-python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/all-fixes.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay --partial
+python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/verified-campaign-29.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay
 ```
 
 Results and diagnostic ROMs stay in your local `build/`. Use `--skip-gui` for selector checks without a windowing environment; the report records that GUI checks were skipped.

@@ -97,9 +97,9 @@ python tools/patch_selector.py path/to/original.rom --config build/my-selection.
 
 過去の全編通しプレイは、落下攻撃＋画面端だけを選んだ1Mbit構成が対象です。全19エリア・139画面、6体のボスと最終2形態、エンディング41項目、次周開始まで通過し、独立再生2回で全56,792更新が一致しました。[全編記録](dist/campaign-verification.json)と[ROMを含まない入力記録](dist/campaign-inputs.json.gz)を保存しています。
 
-全項目構成は、別途通常キー入力でエリア0〜6の34画面・ボス1体まで進めました。エリア6の被弾で体力が尽き、攻略入力はそこで終了しています。通過区間9,329更新を記録再生と電源投入からの入力再生で確認し、記録対象の状態と94回の作業RAM照合が一致しました。[部分ルートの記録](dist/expanded-route-verification.json)と[ROMを含まない入力](dist/expanded-route-inputs.json.gz)を保存しています。この一致は全編クリアや、最後の致死更新の一致を意味しません。
+29項目をすべて選んだ2Mbit構成でも、通常キー入力で全19エリア・137画面、6体のボスと最終2形態、エンディング41項目、次周開始と移動まで確認しました。記録再生と新しい電源投入状態からの入力再生の2回で、全59,346更新と594回の作業RAM照合が一致しました。通常の残機消費・復帰2回を含み、途中の状態復元やゲームのRAM・PC・ROM書き換えは行っていません。[全編の検証記録](dist/expanded-route-verification.json)と[ROMを含まない入力](dist/expanded-route-inputs.json.gz)、対象を固定した[29項目の選択設定](examples/verified-campaign-29.json)を保存しています。
 
-**新しい全項目構成の全編通しプレイと実機の動作は未確認です。** 関数診断と序盤操作の結果を、全編の動作確認とは区別してください。
+この確認範囲は初回クリアと次周開始までです。全経路での不具合の不存在、2周目全編、実機の動作を保証するものではありません。
 
 ## 再検証と修正追加
 
@@ -109,7 +109,7 @@ python tools/verify_bugs.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_expanded.py path/to/original.rom --openmsx path/to/openmsx.exe
 python tools/verify_shield.py path/to/original.rom --openmsx path/to/openmsx.exe --all-fixes --out build/expanded-shield-verification
 python tools/verify_selector.py path/to/original.rom
-python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/all-fixes.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay --partial
+python tools/verify_campaign.py --rom path/to/patched.rom --source-rom path/to/original.rom --config examples/verified-campaign-29.json --inputs dist/expanded-route-inputs.json.gz --out build/expanded-route-replay
 ```
 
 結果と診断用ROMは手元の `build/` へ保存します。画面環境がない場合、選択ツールの検証には `--skip-gui` を指定できます。その場合は記録にも未検証と残ります。
